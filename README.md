@@ -51,13 +51,6 @@ docker compose up -d --build
 npx prisma migrate deploy
 ```
 
-| Service | URL |
-|---------|-----|
-| Dashboard | http://localhost:5173 |
-| API | http://localhost:3000 |
-| Docs | http://localhost:3000/docs |
-| WebSocket | ws://localhost:3000/ws |
-
 > To simulate attacks in real time, see
 > **[hydra-lab](https://github.com/diegoDrp-Dev/hydra-lab)** —
 > a separate repository with intentionally vulnerable targets
