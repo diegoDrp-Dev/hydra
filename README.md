@@ -25,7 +25,30 @@ git clone https://github.com/diegoDrp-Dev/hydra
 cd hydra
 npm install
 cp apps/api-gateway/.env.example apps/api-gateway/.env
-npm run hydra:boot
+```
+
+**Boot (Docker — recommended):**
+```bash
+docker compose down --remove-orphans -v
+docker compose up -d --build
+npx prisma migrate deploy
+```
+
+Sobe: PostgreSQL + Redis + API + Worker + Frontend.
+
+| Service | URL |
+|---------|-----|
+| Dashboard | http://localhost:5173 |
+| API | http://localhost:3000 |
+| Docs | http://localhost:3000/docs |
+| WebSocket | ws://localhost:3000/ws |
+
+**Full reset (clean state):**
+```bash
+docker compose down -v --remove-orphans
+docker system prune -f
+docker compose up -d --build
+npx prisma migrate deploy
 ```
 
 | Service | URL |
