@@ -43,13 +43,6 @@ Sobe: PostgreSQL + Redis + API + Worker + Frontend.
 | Docs | http://localhost:3000/docs |
 | WebSocket | ws://localhost:3000/ws |
 
-**Full reset (clean state):**
-```bash
-docker compose down -v --remove-orphans
-docker system prune -f
-docker compose up -d --build
-npx prisma migrate deploy
-```
 
 > To simulate attacks in real time, see
 > **[hydra-lab](https://github.com/diegoDrp-Dev/hydra-lab)** —
