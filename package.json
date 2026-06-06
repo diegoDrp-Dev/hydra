@@ -1,0 +1,24 @@
+{
+  "name": "hydra",
+  "private": true,
+  "packageManager": "npm@11.11.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "hydra:boot": "docker-compose up --build",
+    "hydra:down": "docker-compose down --volumes"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "turbo": "^2.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.8.0"
+  },
+  "prisma": {
+    "schema": "apps/api-gateway/prisma/schema.prisma"
+  }
+}

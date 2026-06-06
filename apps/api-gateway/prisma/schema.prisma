@@ -1,0 +1,145 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  scans     Scan[]
+  incidents Incident[]
+  alerts    AlertSubscription[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Scan {
+  id         String   @id @default(cuid())
+  url        String
+  statusCode Int?
+  duration   Int?
+
+  score      Int?
+  severity   String?
+  issues     String[]
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  headers    ScanHeader?
+  risks      Risk[]
+  incident   Incident?  @relation("ScanToIncident")
+
+  user       User? @relation(fields: [userId], references: [id])
+  userId     String?
+}
+
+model ScanHeader {
+  id                      String @id @default(cuid())
+  scanId                  String @unique
+  xContentTypeOptions     String?
+  strictTransportSecurity String?
+  contentSecurityPolicy   String?
+
+  scan Scan @relation(fields: [scanId], references: [id], onDelete: Cascade)
+}
+
+model Risk {
+  id          String   @id @default(cuid())
+  scanId      String
+  ruleId      String
+  severity    String   // low, medium, high, critical
+  score       Int      // 0-100
+  description String
+  remediation String?
+  createdAt   DateTime @default(now())
+
+  scan        Scan      @relation(fields: [scanId], references: [id], onDelete: Cascade)
+
+  incidentId  String?
+  incident    Incident? @relation("RiskToIncident", fields: [incidentId], references: [id])
+
+  @@index([scanId])
+  @@index([severity])
+}
+
+model Incident {
+  id              String   @id @default(cuid())
+  title           String
+  description     String
+  severity        String   // low, medium, high, critical
+  status          String   @default("open") // open, investigating, resolved, false_positive
+  riskScore       Int      // 0-100
+  deduplicationKey String   @unique // Hash for deduplication
+  
+  scanId          String?  @unique
+  scan            Scan?    @relation("ScanToIncident", fields: [scanId], references: [id])
+  
+  risks           Risk[]   @relation("RiskToIncident")
+  alerts          Alert[]
+  
+  user            User     @relation(fields: [userId], references: [id])
+  userId          String
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([status])
+  @@index([severity])
+  @@index([userId])
+  @@index([deduplicationKey])
+}
+
+model Alert {
+  id          String   @id @default(cuid())
+  incident    Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  incidentId  String
+  
+  webhookUrl  String?
+  webhookType String?  // discord, slack, generic
+  status      String   @default("pending") // pending, sent, failed
+  
+  error       String?
+  sentAt      DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([incidentId])
+  @@index([status])
+}
+
+model AlertSubscription {
+  id          String   @id @default(cuid())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  
+  webhookUrl  String
+  webhookType String   // discord, slack, generic
+  severities  String[] @default(["critical", "high"]) // Filter by severity
+  
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, webhookUrl])
+  @@index([userId])
+}
+
+model WebhookEvent {
+  id          String   @id @default(cuid())
+  webhookUrl  String
+  incidentId  String
+  
+  statusCode  Int?
+  error       String?
+  retries     Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([webhookUrl])
+}

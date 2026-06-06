@@ -1,0 +1,99 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: hydra-postgres
+    environment:
+      POSTGRES_USER: ${DB_USER:-hydra}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-hydra}
+      POSTGRES_DB: ${DB_NAME:-hydra}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hydra"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: hydra-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api-gateway/Dockerfile
+    container_name: hydra-api
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://${DB_USER:-hydra}:${DB_PASSWORD:-hydra}@postgres:5432/${DB_NAME:-hydra}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:-development_secret_change_me_in_prod}
+      JWT_EXPIRES_IN: 24h
+      LOG_LEVEL: debug
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    working_dir: /app # Set working directory to monorepo root
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/apps/api-gateway/node_modules
+    command: sh -c "cd apps/api-gateway && npx prisma generate && npx prisma migrate deploy && REDIS_HOST=redis REDIS_PORT=6379 npm run dev"
+
+  worker:
+    build:
+      context: .
+      dockerfile: apps/api-gateway/Dockerfile
+    container_name: hydra-worker
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://${DB_USER:-hydra}:${DB_PASSWORD:-hydra}@postgres:5432/${DB_NAME:-hydra}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      WORKER_CONCURRENCY: 5
+      LOG_LEVEL: debug
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    working_dir: /app # Set working directory to monorepo root
+    volumes:
+      - .:/app # Mount the entire monorepo
+      # Proteção contra shadowing do Windows
+      - /app/node_modules
+      - /app/apps/api-gateway/node_modules
+    command: sh -c "cd apps/api-gateway && npx prisma generate && npx prisma migrate deploy && REDIS_HOST=redis REDIS_PORT=6379 npm run worker"
+
+  web:
+    build:
+      context: ./apps/web
+    container_name: hydra-web
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0 --port 5173 --strictPort
+
+volumes:
+  postgres_data:
+  redis_data:
