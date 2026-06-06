@@ -218,6 +218,7 @@ npm run demo   # scans all 4 targets every 2–7s
 ## 👤 Author
 
 **Diego Rodrigues Pereira**
+
 Security Engineer | Backend Developer
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-diego--rodrigues--pereira-0077b5?style=flat&logo=linkedin)](https://www.linkedin.com/in/diego-rodrigues-pereira-drp/)
