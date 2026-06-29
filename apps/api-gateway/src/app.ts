@@ -2,9 +2,12 @@ import cors from "@fastify/cors";
 import Fastify from "fastify";
 import swagger from "@fastify/swagger";
 import swaggerUI from "@fastify/swagger-ui";
+import websocket from "@fastify/websocket";
 
 import { authRoutes } from "./modules/auth/routes/auth.routes.js";
 import { scanRoutes } from "./modules/scans/routes/scan.routes.js";
+import { incidentRoutes } from "./modules/incidents/routes/incident.routes.js";
+import { wsManager } from "./websocket/socket.js";
 
 export const app = Fastify({
   logger: true,
@@ -12,8 +15,10 @@ export const app = Fastify({
 
 app.register(cors, {
   origin: "http://localhost:5173",
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
 });
+
+app.register(websocket);
 
 // ============================
 // GLOBAL ERROR HANDLER
@@ -80,3 +85,9 @@ app.register(authRoutes, {
 app.register(scanRoutes, {
   prefix: "/scan",
 });
+
+app.register(incidentRoutes, {
+  prefix: "/incidents",
+});
+
+void wsManager.register(app);

@@ -30,7 +30,7 @@ export class SlackAdapter {
       const color = this.getSeverityColor(payload.severity);
 
       const message = {
-        text: `🚨 Security Incident: ${payload.title}`,
+        text: `Security Incident: ${payload.title}`,
         attachments: [
           {
             color,

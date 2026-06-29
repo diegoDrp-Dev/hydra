@@ -2,7 +2,7 @@
 
 Hydra é uma plataforma profissional de detecção de ameaças e análise de postura de segurança construída com Node.js, TypeScript, Fastify e PostgreSQL.
 
-## 🏗️ Arquitetura
+##  Arquitetura
 
 ### Componentes Principais
 
@@ -33,7 +33,7 @@ Hydra é uma plataforma profissional de detecção de ameaças e análise de pos
 └─────────────────────────────────────────────────┘
 ```
 
-## 📦 Módulos Principais
+##  Módulos Principais
 
 ### 1. **Risk Engine** (`/src/modules/risk-engine`)
 Motor de avaliação de risco extensível com scoring 0-100.
@@ -189,7 +189,7 @@ logger.error({ error: err }, "Database connection failed");
 logger.debug({ trace: "..." }, "Debug information");
 ```
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### 1. Clone e Setup
 ```bash
@@ -229,7 +229,7 @@ npm --workspace=api-gateway run dev
 npm --workspace=api-gateway run worker
 ```
 
-## 📊 Workflow Típico
+##  Workflow Típico
 
 1. **Usuário cria scan** via POST `/scans`
 2. **Job é adicionado** à fila BullMQ
@@ -239,7 +239,7 @@ npm --workspace=api-gateway run worker
 6. **Webhooks são enviados** aos subscribers
 7. **WebSocket broadcast** para clientes conectados
 
-## 🧪 Testes
+##  Testes
 
 ```bash
 npm --workspace=api-gateway test
@@ -251,7 +251,7 @@ npm --workspace=api-gateway test -- --watch
 - `tests/risk-engine.test.ts`
 - `tests/incident.test.ts`
 
-## 📝 Modelo de Dados
+##  Modelo de Dados
 
 ### Tabelas Principais
 ```sql
@@ -300,7 +300,7 @@ CREATE TABLE AlertSubscription {
 }
 ```
 
-## 🔐 Segurança
+##  Segurança
 
 - **JWT**: Autenticação com tokens
 - **Bcrypt**: Hashing de senhas (10 rounds)
@@ -309,7 +309,7 @@ CREATE TABLE AlertSubscription {
 - **Logging**: Estruturado para auditoria
 - **Variáveis de Ambiente**: Sensíveis não são commitadas
 
-## 🎯 SOLID Principles
+##  SOLID Principles
 
 - **SRP**: Cada módulo tem responsabilidade única
 - **OCP**: Extensível via RuleRegistry, Adapters
@@ -317,7 +317,7 @@ CREATE TABLE AlertSubscription {
 - **ISP**: Interfaces segregadas (detalhadas)
 - **DIP**: Depende de abstrações, não implementações
 
-## 📚 Estrutura de Diretórios
+##  Estrutura de Diretórios
 
 ```
 hydra/
@@ -356,7 +356,7 @@ hydra/
 └── docker-compose.yml
 ```
 
-## 🔄 Próximos Passos
+##  Próximos Passos
 
 1. **Autenticação Avançada**
    - OAuth2/OIDC
@@ -382,10 +382,10 @@ hydra/
    - Query optimization
    - Horizontal scaling
 
-## 📞 Support
+##  Support
 
 Para issues e sugestões, abra um issue no repositório.
 
 ---
 
-**Desenvolvido com ❤️ para segurança em produção**
+**Desenvolvido com  para segurança em produção**

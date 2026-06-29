@@ -1,86 +1,86 @@
-# 🏆 HYDRA - IMPLEMENTAÇÃO COMPLETA ✅
+#  HYDRA - IMPLEMENTAÇÃO COMPLETA 
 
-## 📊 STATUS FINAL
+##  STATUS FINAL
 
 ```
-✅ 10/10 TAREFAS CONCLUÍDAS
-✅ 27 ARQUIVOS NOVOS CRIADOS
-✅ 5 ARQUIVOS ATUALIZADOS
-✅ ~3000+ LINHAS DE CÓDIGO
-✅ 100% COMPATIBILIDADE RETROATIVA
-✅ PRONTO PARA PRODUÇÃO
+ 10/10 TAREFAS CONCLUÍDAS
+ 27 ARQUIVOS NOVOS CRIADOS
+ 5 ARQUIVOS ATUALIZADOS
+ ~3000+ LINHAS DE CÓDIGO
+ 100% COMPATIBILIDADE RETROATIVA
+ PRONTO PARA PRODUÇÃO
 ```
 
 ---
 
-## 📁 ESTRUTURA COMPLETA DO PROJETO
+##  ESTRUTURA COMPLETA DO PROJETO
 
 ```
 hydra/
-├── 📄 ARCHITECTURE.md                    [9.9 KB] Documentação técnica completa
-├── 📄 IMPLEMENTATION_SUMMARY.md           [12 KB] Este sumário detalhado
-├── 📄 docker-compose.yml                 [ENHANCED] 5 serviços orchestrados
+├──  ARCHITECTURE.md                    [9.9 KB] Documentação técnica completa
+├──  IMPLEMENTATION_SUMMARY.md           [12 KB] Este sumário detalhado
+├──  docker-compose.yml                 [ENHANCED] 5 serviços orchestrados
 │
 ├── apps/
 │   ├── api-gateway/                      [API Node.js + TypeScript]
 │   │   ├── src/
 │   │   │   ├── config/
-│   │   │   │   └── 📄 queue.config.ts    ✨ NEW - Queue configuration
+│   │   │   │   └──  queue.config.ts     NEW - Queue configuration
 │   │   │   │
 │   │   │   ├── lib/
-│   │   │   │   └── 📄 logger.ts          ✨ NEW - Pino logger
+│   │   │   │   └──  logger.ts           NEW - Pino logger
 │   │   │   │
 │   │   │   ├── modules/
 │   │   │   │   ├── auth/                 [EXISTENTE - Mantido]
 │   │   │   │   ├── scans/                [EXISTENTE - Melhorado]
 │   │   │   │   │   └── controllers/
-│   │   │   │   │       └── scan.controller.ts  🔄 UPDATED
+│   │   │   │   │       └── scan.controller.ts   UPDATED
 │   │   │   │   │
-│   │   │   │   ├── risk-engine/          ✨ NEW MODULE [Engine de scoring]
+│   │   │   │   ├── risk-engine/           NEW MODULE [Engine de scoring]
 │   │   │   │   │   ├── types/
-│   │   │   │   │   │   └── index.ts      ✨ NEW - Types & interfaces
+│   │   │   │   │   │   └── index.ts       NEW - Types & interfaces
 │   │   │   │   │   ├── services/
-│   │   │   │   │   │   └── risk.service.ts  ✨ NEW - Business logic
+│   │   │   │   │   │   └── risk.service.ts   NEW - Business logic
 │   │   │   │   │   ├── rules/
-│   │   │   │   │   │   └── default.rules.ts ✨ NEW - 8 regras padrão
+│   │   │   │   │   │   └── default.rules.ts  NEW - 8 regras padrão
 │   │   │   │   │   └── repositories/
-│   │   │   │   │       └── risk.repository.ts ✨ NEW - Data persistence
+│   │   │   │   │       └── risk.repository.ts  NEW - Data persistence
 │   │   │   │   │
-│   │   │   │   ├── incidents/            ✨ NEW MODULE [Incident management]
+│   │   │   │   ├── incidents/             NEW MODULE [Incident management]
 │   │   │   │   │   ├── services/
-│   │   │   │   │   │   └── incident.service.ts ✨ NEW - Auto-generation
+│   │   │   │   │   │   └── incident.service.ts  NEW - Auto-generation
 │   │   │   │   │   ├── repositories/
-│   │   │   │   │   │   └── incident.repository.ts ✨ NEW - Persistence
+│   │   │   │   │   │   └── incident.repository.ts  NEW - Persistence
 │   │   │   │   │   ├── controllers/
-│   │   │   │   │   │   └── incident.controller.ts ✨ NEW - HTTP handlers
+│   │   │   │   │   │   └── incident.controller.ts  NEW - HTTP handlers
 │   │   │   │   │   └── routes/
-│   │   │   │   │       └── incident.routes.ts ✨ NEW - REST endpoints
+│   │   │   │   │       └── incident.routes.ts  NEW - REST endpoints
 │   │   │   │   │
-│   │   │   │   └── alerts/               ✨ NEW MODULE [Webhooks]
+│   │   │   │   └── alerts/                NEW MODULE [Webhooks]
 │   │   │   │       ├── services/
-│   │   │   │       │   └── webhook.service.ts ✨ NEW - Orchestration
+│   │   │   │       │   └── webhook.service.ts  NEW - Orchestration
 │   │   │   │       └── adapters/
-│   │   │   │           ├── discord.adapter.ts ✨ NEW
-│   │   │   │           ├── slack.adapter.ts   ✨ NEW
-│   │   │   │           └── generic.adapter.ts ✨ NEW
+│   │   │   │           ├── discord.adapter.ts  NEW
+│   │   │   │           ├── slack.adapter.ts    NEW
+│   │   │   │           └── generic.adapter.ts  NEW
 │   │   │   │
-│   │   │   ├── websocket/                ✨ NEW MODULE [Real-time]
-│   │   │   │   └── socket.ts             ✨ NEW - WebSocket manager
+│   │   │   ├── websocket/                 NEW MODULE [Real-time]
+│   │   │   │   └── socket.ts              NEW - WebSocket manager
 │   │   │   │
-│   │   │   ├── app.ts                    🔄 UPDATED - New routes & WS
+│   │   │   ├── app.ts                     UPDATED - New routes & WS
 │   │   │   └── server.ts                 [EXISTENTE]
 │   │   │
-│   │   ├── tests/                        ✨ NEW TEST SUITE
-│   │   │   ├── risk-engine.test.ts       ✨ NEW - 6 test cases
-│   │   │   └── incident.test.ts          ✨ NEW - 8 test cases
+│   │   ├── tests/                         NEW TEST SUITE
+│   │   │   ├── risk-engine.test.ts        NEW - 6 test cases
+│   │   │   └── incident.test.ts           NEW - 8 test cases
 │   │   │
 │   │   ├── prisma/
-│   │   │   ├── schema.prisma             🔄 UPDATED - 8 novos modelos
-│   │   │   └── 📄 MIGRATION_GUIDE.md     ✨ NEW - Migration instructions
+│   │   │   ├── schema.prisma              UPDATED - 8 novos modelos
+│   │   │   └──  MIGRATION_GUIDE.md      NEW - Migration instructions
 │   │   │
-│   │   ├── 📄 Dockerfile                 ✨ NEW - Production-ready
-│   │   ├── 📄 .env.example               ✨ NEW - Environment template
-│   │   └── package.json                  🔄 UPDATED - New deps
+│   │   ├──  Dockerfile                  NEW - Production-ready
+│   │   ├──  .env.example                NEW - Environment template
+│   │   └── package.json                   UPDATED - New deps
 │   │
 │   └── web/                              [Frontend - Existente]
 │
@@ -90,10 +90,10 @@ hydra/
 
 ---
 
-## 🎯 TAREFAS IMPLEMENTADAS
+##  TAREFAS IMPLEMENTADAS
 
-### ✅ TASK 1: Infra & Queue
-**Status:** COMPLETO ✅
+###  TASK 1: Infra & Queue
+**Status:** COMPLETO 
 
 - [x] Redis + BullMQ configurado
 - [x] Retry: 3 tentativas
@@ -102,13 +102,13 @@ hydra/
 - [x] Event handlers: completed, failed, error
 
 **Arquivos:**
-- ✨ `src/config/queue.config.ts`
-- 🔄 `src/queues/scan.queue.ts`
+-  `src/config/queue.config.ts`
+-  `src/queues/scan.queue.ts`
 
 ---
 
-### ✅ TASK 2: Pino Logger
-**Status:** COMPLETO ✅
+###  TASK 2: Pino Logger
+**Status:** COMPLETO 
 
 - [x] Logger estruturado
 - [x] Modo dev: Pretty-printed + colors
@@ -117,12 +117,12 @@ hydra/
 - [x] Integrado em todos os módulos
 
 **Arquivo:**
-- ✨ `src/lib/logger.ts` (32 lines)
+-  `src/lib/logger.ts` (32 lines)
 
 ---
 
-### ✅ TASK 3: Risk Engine
-**Status:** COMPLETO ✅
+###  TASK 3: Risk Engine
+**Status:** COMPLETO 
 
 **Componentes:**
 - [x] `RiskService` - Orquestração de avaliação
@@ -136,18 +136,18 @@ hydra/
 - Regras extensíveis
 
 **Arquivos:**
-- ✨ `src/modules/risk-engine/types/index.ts` (65 lines)
-- ✨ `src/modules/risk-engine/services/risk.service.ts` (123 lines)
-- ✨ `src/modules/risk-engine/rules/default.rules.ts` (125 lines)
-- ✨ `src/modules/risk-engine/repositories/risk.repository.ts` (108 lines)
+-  `src/modules/risk-engine/types/index.ts` (65 lines)
+-  `src/modules/risk-engine/services/risk.service.ts` (123 lines)
+-  `src/modules/risk-engine/rules/default.rules.ts` (125 lines)
+-  `src/modules/risk-engine/repositories/risk.repository.ts` (108 lines)
 
 **Tests:**
-- ✨ `tests/risk-engine.test.ts` (6 test cases)
+-  `tests/risk-engine.test.ts` (6 test cases)
 
 ---
 
-### ✅ TASK 4: Data Model
-**Status:** COMPLETO ✅
+###  TASK 4: Data Model
+**Status:** COMPLETO 
 
 **Modelos Adicionados:**
 ```sql
@@ -199,12 +199,12 @@ WebhookEvent
 ```
 
 **Arquivo:**
-- 🔄 `prisma/schema.prisma` (164 lines)
+-  `prisma/schema.prisma` (164 lines)
 
 ---
 
-### ✅ TASK 5: Incident Management
-**Status:** COMPLETO ✅
+###  TASK 5: Incident Management
+**Status:** COMPLETO 
 
 **Componentes:**
 - [x] `IncidentService` - Auto-generation + deduplication
@@ -227,18 +227,18 @@ GET    /incidents/admin/stats    - Estatísticas
 - Mantém histórico de scans relacionados
 
 **Arquivos:**
-- ✨ `src/modules/incidents/services/incident.service.ts` (180 lines)
-- ✨ `src/modules/incidents/repositories/incident.repository.ts` (195 lines)
-- ✨ `src/modules/incidents/controllers/incident.controller.ts` (138 lines)
-- ✨ `src/modules/incidents/routes/incident.routes.ts` (88 lines)
+-  `src/modules/incidents/services/incident.service.ts` (180 lines)
+-  `src/modules/incidents/repositories/incident.repository.ts` (195 lines)
+-  `src/modules/incidents/controllers/incident.controller.ts` (138 lines)
+-  `src/modules/incidents/routes/incident.routes.ts` (88 lines)
 
 **Tests:**
-- ✨ `tests/incident.test.ts` (8 test cases)
+-  `tests/incident.test.ts` (8 test cases)
 
 ---
 
-### ✅ TASK 6: WebSocket Real-time
-**Status:** COMPLETO ✅
+###  TASK 6: WebSocket Real-time
+**Status:** COMPLETO 
 
 - [x] WebSocket via @fastify/websocket
 - [x] Rooms: `incidents`
@@ -247,7 +247,7 @@ GET    /incidents/admin/stats    - Estatísticas
 - [x] Keepalive: Ping/Pong
 
 **Arquivo:**
-- ✨ `src/websocket/socket.ts` (195 lines)
+-  `src/websocket/socket.ts` (195 lines)
 
 **Protocol:**
 ```json
@@ -268,8 +268,8 @@ GET    /incidents/admin/stats    - Estatísticas
 
 ---
 
-### ✅ TASK 7: Webhook System
-**Status:** COMPLETO ✅
+###  TASK 7: Webhook System
+**Status:** COMPLETO 
 
 **Adapters:**
 - [x] Discord: Embed colorido, rich fields
@@ -283,10 +283,10 @@ GET    /incidents/admin/stats    - Estatísticas
 - [x] Event recording
 
 **Arquivos:**
-- ✨ `src/modules/alerts/services/webhook.service.ts` (226 lines)
-- ✨ `src/modules/alerts/adapters/discord.adapter.ts` (96 lines)
-- ✨ `src/modules/alerts/adapters/slack.adapter.ts` (88 lines)
-- ✨ `src/modules/alerts/adapters/generic.adapter.ts` (71 lines)
+-  `src/modules/alerts/services/webhook.service.ts` (226 lines)
+-  `src/modules/alerts/adapters/discord.adapter.ts` (96 lines)
+-  `src/modules/alerts/adapters/slack.adapter.ts` (88 lines)
+-  `src/modules/alerts/adapters/generic.adapter.ts` (71 lines)
 
 **Fluxo:**
 1. Subscriber setup: `webhookService.subscribe(userId, url, type)`
@@ -297,8 +297,8 @@ GET    /incidents/admin/stats    - Estatísticas
 
 ---
 
-### ✅ TASK 8: Tests
-**Status:** COMPLETO ✅
+###  TASK 8: Tests
+**Status:** COMPLETO 
 
 **Risk Engine Tests (6 cases):**
 - HTTP-only detection
@@ -319,13 +319,13 @@ GET    /incidents/admin/stats    - Estatísticas
 - Statistics
 
 **Arquivos:**
-- ✨ `tests/risk-engine.test.ts` (153 lines)
-- ✨ `tests/incident.test.ts` (182 lines)
+-  `tests/risk-engine.test.ts` (153 lines)
+-  `tests/incident.test.ts` (182 lines)
 
 ---
 
-### ✅ TASK 9: Docker Compose
-**Status:** COMPLETO ✅
+###  TASK 9: Docker Compose
+**Status:** COMPLETO 
 
 **Serviços (5):**
 ```yaml
@@ -336,28 +336,28 @@ worker:              # Security scanner
 web:                 # Frontend (Vite)
 ```
 
-**Healthchecks:** ✅ Todos configurados
-**Volumes:** ✅ Persistência dados + code
-**Dev Mode:** ✅ Hot-reload habilitado
-**Networks:** ✅ Auto-configured
+**Healthchecks:**  Todos configurados
+**Volumes:**  Persistência dados + code
+**Dev Mode:**  Hot-reload habilitado
+**Networks:**  Auto-configured
 
 **Arquivo:**
-- 🔄 `docker-compose.yml` (UPGRADED)
+-  `docker-compose.yml` (UPGRADED)
 
 ---
 
-### ✅ TASK 10: Documentation
-**Status:** COMPLETO ✅
+###  TASK 10: Documentation
+**Status:** COMPLETO 
 
 **Documentos Criados:**
-- 📄 `ARCHITECTURE.md` (9.9 KB) - Detalhado
-- 📄 `IMPLEMENTATION_SUMMARY.md` (12 KB) - Este
-- 📄 `.env.example` - Template vars
-- 📄 `prisma/MIGRATION_GUIDE.md` - Migration instructions
+-  `ARCHITECTURE.md` (9.9 KB) - Detalhado
+-  `IMPLEMENTATION_SUMMARY.md` (12 KB) - Este
+-  `.env.example` - Template vars
+-  `prisma/MIGRATION_GUIDE.md` - Migration instructions
 
 ---
 
-## 🔗 FLUXO COMPLETO DA PLATAFORMA
+##  FLUXO COMPLETO DA PLATAFORMA
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -375,8 +375,8 @@ web:                 # Frontend (Vite)
             ┌────────────────────────┐
             │   BullMQ Queue         │
             │   security-scans       │
-            │   ✓ Retry: 3x          │
-            │   ✓ Backoff: Exponential
+            │   - Retry: 3x          │
+            │   - Backoff: Exponential
             └────────────┬───────────┘
                          │
                          ▼
@@ -457,12 +457,12 @@ web:                 # Frontend (Vite)
 
 ---
 
-## 📊 ESTATÍSTICAS FINAIS
+##  ESTATÍSTICAS FINAIS
 
 | Métrica | Valor |
 |---------|-------|
-| **Total de arquivos novos** | 27 ✨ |
-| **Arquivos modificados** | 5 🔄 |
+| **Total de arquivos novos** | 27  |
+| **Arquivos modificados** | 5  |
 | **Total de linhas novo** | ~3,000+ |
 | **Módulos implementados** | 5 |
 | **Regras de risco** | 8 |
@@ -475,32 +475,32 @@ web:                 # Frontend (Vite)
 
 ---
 
-## 🎓 PRINCÍPIOS APLICADOS
+##  PRINCÍPIOS APLICADOS
 
 ### SOLID
-- ✅ **SRP**: Cada classe tem responsabilidade única
-- ✅ **OCP**: Extensível via RuleRegistry e Adapters
-- ✅ **LSP**: Interfaces bem definidas
-- ✅ **ISP**: Interfaces segregadas
-- ✅ **DIP**: Depende de abstrações
+-  **SRP**: Cada classe tem responsabilidade única
+-  **OCP**: Extensível via RuleRegistry e Adapters
+-  **LSP**: Interfaces bem definidas
+-  **ISP**: Interfaces segregadas
+-  **DIP**: Depende de abstrações
 
 ### Clean Architecture
-- ✅ **Separation of Concerns**: Modules isolados
-- ✅ **Dependency Injection**: Services, Repositories
-- ✅ **Testability**: 100% testável
-- ✅ **Maintainability**: Código claro e documentado
-- ✅ **Scalability**: Extensível sem refactor
+-  **Separation of Concerns**: Modules isolados
+-  **Dependency Injection**: Services, Repositories
+-  **Testability**: 100% testável
+-  **Maintainability**: Código claro e documentado
+-  **Scalability**: Extensível sem refactor
 
 ### Security
-- ✅ TypeScript strict mode
-- ✅ Validação JSON Schema
-- ✅ Logging estruturado
-- ✅ Sem secrets em repo
-- ✅ CORS configurado
+-  TypeScript strict mode
+-  Validação JSON Schema
+-  Logging estruturado
+-  Sem secrets em repo
+-  CORS configurado
 
 ---
 
-## 🚀 QUICK START
+##  QUICK START
 
 ```bash
 # 1. Setup
@@ -521,21 +521,21 @@ npm --workspace=api-gateway run worker   # Terminal 2
 
 ---
 
-## 📝 PRÓXIMOS PASSOS
+##  PRÓXIMOS PASSOS
 
-### 🟢 Curto Prazo (1-2 sprints)
+###  Curto Prazo (1-2 sprints)
 - [ ] CI/CD setup (GitHub Actions)
 - [ ] Testes de integração
 - [ ] Logging centralizado
 - [ ] Auth middleware
 
-### 🟡 Médio Prazo (2-3 sprints)
+###  Médio Prazo (2-3 sprints)
 - [ ] Compliance scanning (CIS, OWASP)
 - [ ] Reportação (PDF, CSV)
 - [ ] SIEM integration
 - [ ] Rate limiting
 
-### 🔴 Longo Prazo (4+ sprints)
+###  Longo Prazo (4+ sprints)
 - [ ] Machine Learning
 - [ ] Distributed workers
 - [ ] GraphQL API
@@ -543,7 +543,7 @@ npm --workspace=api-gateway run worker   # Terminal 2
 
 ---
 
-## ✨ DESTAQUES
+##  DESTAQUES
 
 1. **Risk Engine Extensível**: Adicione regras dinamicamente em runtime
 2. **Deduplication Inteligente**: Evita duplicação automática
@@ -556,20 +556,20 @@ npm --workspace=api-gateway run worker   # Terminal 2
 
 ---
 
-## 📞 SUPORTE
+##  SUPORTE
 
-1. 📖 Consulte `ARCHITECTURE.md` para detalhes técnicos
-2. 🧪 Veja `tests/` para exemplos de uso
-3. 📋 Revise tipos em `risk-engine/types/`
-4. 🔧 Configure `.env` baseado em `.env.example`
+1.  Consulte `ARCHITECTURE.md` para detalhes técnicos
+2.  Veja `tests/` para exemplos de uso
+3.  Revise tipos em `risk-engine/types/`
+4.  Configure `.env` baseado em `.env.example`
 
 ---
 
-**STATUS: ✅ PRONTO PARA PRODUÇÃO**
+**STATUS:  PRONTO PARA PRODUÇÃO**
 
 Hydra agora é uma plataforma profissional de detecção e resposta de segurança!
 
 ---
 
-*Implementado com ❤️ para segurança*
+*Implementado com  para segurança*
 *Stack: Node.js 22 + TypeScript 5.8 + Fastify 5.3 + PostgreSQL 16 + Redis 7 + BullMQ 5.76*

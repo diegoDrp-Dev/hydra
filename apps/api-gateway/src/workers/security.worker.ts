@@ -24,7 +24,7 @@ const webhookService = new WebhookService();
 function resolveUrl(url: string) {
   if (!url) throw new Error("URL is missing in job data");
 
-  // 🔥 FIX PRINCIPAL: localhost dentro do Docker não funciona
+  // FIX PRINCIPAL: localhost dentro do Docker não funciona
   if (url.includes("localhost")) {
     return url.replace("localhost", "host.docker.internal");
   }
@@ -56,7 +56,7 @@ const worker = new Worker(
         "DEBUG: Starting HTTP request"
       );
 
-      // 🔥 HTTP REQUEST
+      // HTTP REQUEST
       const response = await axios.get(targetUrl, {
         timeout: 10000,
         validateStatus: () => true,
@@ -73,7 +73,7 @@ const worker = new Worker(
         "DEBUG: HTTP request completed"
       );
 
-      // 🔥 RISK ENGINE
+      // RISK ENGINE
       const assessment = riskService.assessRisk({
         url: targetUrl,
         headers: response.headers as Record<string, string | string[]>,
@@ -91,7 +91,7 @@ const worker = new Worker(
         "Risk assessment completed"
       );
 
-      // 🔥 SAVE SCAN
+      // SAVE SCAN
       const scan = await prisma.scan.create({
         data: {
           url: targetUrl,
@@ -124,7 +124,7 @@ const worker = new Worker(
         "Scan saved successfully"
       );
 
-      // 🔥 INCIDENTS
+      // INCIDENTS
       if (assessment.risks.length > 0 && userId) {
         const incidentResult = await incidentService.generateFromScan({
           url: targetUrl,
@@ -165,7 +165,7 @@ const worker = new Worker(
     } catch (error) {
       const err = error as Error;
 
-      // 💣 DEBUG MÁXIMO (AGORA NÃO SOME MAIS)
+      // DEBUG MÁXIMO (AGORA NÃO SOME MAIS)
       logger.error(
         {
           jobId: job.id,
@@ -188,7 +188,7 @@ const worker = new Worker(
   }
 );
 
-// 🔥 EVENTOS DO WORKER
+// EVENTOS DO WORKER
 worker.on("completed", (job) => {
   logger.info({ jobId: job?.id }, "Scan completed");
 });

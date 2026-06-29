@@ -5,6 +5,7 @@
 
 import type { FastifyInstance } from "fastify";
 import { IncidentController } from "../controllers/incident.controller.js";
+import { authMiddleware } from "../../middlewares/auth.middleware.js";
 
 const controller = new IncidentController();
 
@@ -17,6 +18,7 @@ export async function incidentRoutes(app: FastifyInstance) {
     schema: {
       description: "Get user incidents",
       tags: ["Incidents"],
+      security: [{ bearerAuth: [] }],
       querystring: {
         type: "object",
         properties: {
@@ -25,6 +27,7 @@ export async function incidentRoutes(app: FastifyInstance) {
         },
       },
     },
+    preHandler: authMiddleware,
     handler: controller.getUserIncidents.bind(controller),
   });
 

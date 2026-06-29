@@ -1,4 +1,4 @@
-# HYDRA 🐉
+# HYDRA 
 ### Real-Time Security Operations Center (SOC) Platform
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178c6?style=flat&logo=typescript)
@@ -18,7 +18,7 @@
 
 ---
 
-## 🚀 Quick Start
+##  Quick Start
 
 ```bash
 git clone https://github.com/diegoDrp-Dev/hydra
@@ -51,7 +51,7 @@ Sobe: PostgreSQL + Redis + API + Worker + Frontend.
 
 ---
 
-## 🚨 Overview
+##  Overview
 
 Hydra is a **real-time SOC platform** that simulates how enterprise
 security systems detect, score, and respond to threats.
@@ -62,7 +62,7 @@ covering the full internal lifecycle of a SOC engine.
 
 ---
 
-## ⚙️ Architecture
+##  Architecture
 
 POST /scans
 ↓
@@ -92,34 +92,34 @@ SOC Dashboard (real-time update)
 
 ---
 
-## 🔍 Core Features
+##  Core Features
 
-### 🧠 Risk Engine
+###  Risk Engine
 - 8 built-in security rules (CSP, HSTS, X-Frame-Options, auth strength...)
 - Dynamic 0–100 normalized scoring
 - Automatic severity classification: `low` → `medium` → `high` → `critical`
 - Extensible rule registry — add new rules without redeploy
 
-### 📡 Real-Time Monitoring
+###  Real-Time Monitoring
 - Primary WebSocket stream
 - Polling fallback (resilient mode)
 - Live incident feed with automatic deduplication
 - Continuous dashboard synchronization
 
-### 🗺️ Network Interception Radar
+###  Network Interception Radar
 - Custom SVG visualization (no D3 or external libs)
 - Severity-based pulsing nodes
 - Animated radar sweep (Darktrace-style)
 - Per-node tooltip with scan details
 - Deterministic positioning by hostname (golden angle algorithm)
 
-### ⚡ Incident Management
+###  Incident Management
 - Auto-generation from scan results
 - Hash-based deduplication (hostname + risk signature)
 - Status tracking: `open` → `investigating` → `resolved`
 - Webhook alerts: Discord, Slack, Generic
 
-### 🔄 Distributed Queue
+###  Distributed Queue
 - BullMQ + Redis
 - 3x retry with exponential backoff (2s → 4s → 8s)
 - Dead Letter Queue for permanent failures
@@ -127,7 +127,7 @@ SOC Dashboard (real-time update)
 
 ---
 
-## 📈 Risk Rules Coverage
+##  Risk Rules Coverage
 
 | Rule | What it detects |
 |------|----------------|
@@ -142,7 +142,7 @@ SOC Dashboard (real-time update)
 
 ---
 
-## 🎯 What This Demonstrates
+##  What This Demonstrates
 
 | Concept | Implementation in Hydra |
 |---------|------------------------|
@@ -156,7 +156,7 @@ SOC Dashboard (real-time update)
 
 ---
 
-## 🧰 Tech Stack
+##  Tech Stack
 
 **Backend:** Node.js 22, Fastify 5.3, TypeScript 5.8 strict,
 Prisma ORM, PostgreSQL 16, Redis 7, BullMQ 5.76, Pino
@@ -168,7 +168,7 @@ native WebSocket
 
 ---
 
-## 🧪 Validated with hydra-lab
+##  Validated with hydra-lab
 
 This system was validated using
 **[hydra-lab](https://github.com/diegoDrp-Dev/hydra-lab)** —
@@ -182,18 +182,18 @@ npm run demo   # scans all 4 targets every 2–7s
 
 ---
 
-## 🟢 System Status
+##  System Status
 
 | Module | Status |
 |--------|--------|
-| API Gateway | ✅ |
-| Worker Engine | ✅ |
-| Risk Engine | ✅ |
-| Incident Manager | ✅ |
-| SOC Dashboard | ✅ |
-| WebSocket Stream | ✅ |
-| Webhook Alerts | ✅ |
-| Docker Compose | ✅ |
+| API Gateway |  |
+| Worker Engine |  |
+| Risk Engine |  |
+| Incident Manager |  |
+| SOC Dashboard |  |
+| WebSocket Stream |  |
+| Webhook Alerts |  |
+| Docker Compose |  |
 
 ---
 
@@ -201,7 +201,7 @@ npm run demo   # scans all 4 targets every 2–7s
 
 ---
 
-## 👤 Author
+##  Author
 
 **Diego Rodrigues Pereira**
 
@@ -212,10 +212,10 @@ Security Engineer | Backend Developer
 
 ---
 
-⚠️ *Simulation project built for educational and portfolio purposes.
+ *Simulation project built for educational and portfolio purposes.
 No real-world systems are targeted or affected.*
 
 ---
 
-MIT License © 2026 Diego Rodrigues Pereira
+MIT License  2026 Diego Rodrigues Pereira
 

@@ -21,8 +21,15 @@ export class IncidentController {
    */
   async getUserIncidents(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const { userId } = (request as any).user;
+      const userId = (request as any).user?.id;
       const { status, severity } = request.query as any;
+
+      if (!userId) {
+        return reply.status(401).send({
+          success: false,
+          error: "Authentication required",
+        });
+      }
 
       const incidents = await this.incidentService.getUserIncidents(userId, {
         status,
