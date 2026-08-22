@@ -20,7 +20,9 @@ cp apps/api-gateway/.env.example apps/api-gateway/.env
 | `DATABASE_URL` | Prisma connection string | `postgresql://hydra:hydra@postgres:5432/hydra` |
 | `REDIS_HOST` | Redis hostname | `redis` |
 | `REDIS_PORT` | Redis port | `6379` |
-| `JWT_SECRET` | Secret key for JWT signing | `development_secret_change_me_in_prod` |
+| `JWT_SECRET` | JWT signing key (required; 32+ characters in production) | none |
+| `ALLOW_PRIVATE_SCAN_TARGETS` | Allows private/loopback targets for an authorized local lab | `false` |
+| `CORS_ORIGINS` | Comma-separated browser origins | `http://localhost:5173` |
 
 ## Running with Docker (Recommended)
 
@@ -109,17 +111,42 @@ curl http://localhost:3000/health
 
 ### Submit a scan (PowerShell)
 ```powershell
-Invoke-RestMethod -Uri "http://localhost:3000/scans" -Method Post `
+Invoke-RestMethod -Uri "http://localhost:3000/scan" -Method Post `
+  -Headers @{ Authorization = "Bearer $token" } `
   -Body '{"url":"https://example.com"}' `
   -ContentType "application/json"
 ```
 
 ### Submit a scan (Linux/Mac)
 ```bash
-curl -X POST http://localhost:3000/scans \
+curl -X POST http://localhost:3000/scan \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"url":"https://example.com"}'
 ```
+
+All scan and incident endpoints require authentication. Create an account through
+the dashboard or `POST /auth/register`, then obtain a token from `POST /auth/login`.
+Private targets, including the Hydra Lab, remain blocked unless
+`ALLOW_PRIVATE_SCAN_TARGETS=true` is explicitly configured in a development environment.
+
+## Enterprise Event Core
+
+Authenticated tenant-scoped endpoints:
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `POST` | `/events` | Validate, normalize, deduplicate, store and evaluate an event |
+| `GET` | `/events?limit=50&cursor=...` | Cursor-paginated event investigation |
+| `GET` | `/detections` | List tenant detection rules |
+| `POST` | `/detections` | Create a versioned rule (`ADMIN`) |
+| `POST` | `/detections/:id/test` | Test a rule against an in-memory dataset |
+| `PATCH` | `/detections/:id/status` | Governed lifecycle transition (`ADMIN`) |
+
+Detection conditions support `equals`, `not_equals`, `contains`, `in`, `gte`,
+`lte`, and `exists` against normalized field paths such as `process.name`.
+Rules cannot transition directly from `draft` to `enabled`; they must enter
+`testing` first.
 
 ## Troubleshooting
 

@@ -90,11 +90,14 @@ export class IncidentRepository {
    */
   async updateStatus(
     incidentId: string,
+    userId: string,
     status: string
   ): Promise<IncidentWithRelations> {
     try {
+      const existing = await prisma.incident.findFirst({ where: { id: incidentId, userId } });
+      if (!existing) throw new Error("Incident not found");
       const incident = await prisma.incident.update({
-        where: { id: incidentId },
+        where: { id: existing.id },
         data: { status, updatedAt: new Date() },
         include: { risks: true, scan: true, alerts: true },
       });
@@ -110,10 +113,10 @@ export class IncidentRepository {
   /**
    * Get incident by ID
    */
-  async getById(incidentId: string): Promise<IncidentWithRelations | null> {
+  async getById(incidentId: string, userId: string): Promise<IncidentWithRelations | null> {
     try {
-      const incident = await prisma.incident.findUnique({
-        where: { id: incidentId },
+      const incident = await prisma.incident.findFirst({
+        where: { id: incidentId, userId },
         include: {
           risks: true,
           scan: true,

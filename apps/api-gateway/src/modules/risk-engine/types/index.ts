@@ -64,6 +64,7 @@ export const calculateSeverity = (score: number): Severity => {
  * Creates a deterministic hash based on risk factors
  */
 export const generateDeduplicationKey = (
+  ownerId: string,
   url: string,
   risks: DetectedRisk[]
 ): string => {
@@ -73,5 +74,5 @@ export const generateDeduplicationKey = (
     .join("|");
 
   const urlHash = new URL(url).hostname;
-  return `${urlHash}:${riskSignature}`;
+  return `${ownerId}:${urlHash}:${riskSignature}`;
 };

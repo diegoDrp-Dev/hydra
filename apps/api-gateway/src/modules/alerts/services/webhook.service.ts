@@ -188,6 +188,7 @@ export class WebhookService {
       // Find all subscriptions for this severity level
       const subscriptions = await prisma.alertSubscription.findMany({
         where: {
+          userId: incident.userId,
           isActive: true,
           severities: {
             hasSome: [incident.severity],

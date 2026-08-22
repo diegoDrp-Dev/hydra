@@ -2,11 +2,14 @@ import type { FastifyInstance } from "fastify";
 
 import { ScanController } from "../controllers/scan.controller.js";
 import { ScansController } from "../controllers/scans.controller.js";
+import { authMiddleware } from "../../middlewares/auth.middleware.js";
 
 const scanController = new ScanController();
 const scansController = new ScansController();
 
 export async function scanRoutes(app: FastifyInstance) {
+
+  app.addHook("preHandler", authMiddleware);
 
   // CREATE SCAN
   app.post("/", {
@@ -19,6 +22,8 @@ export async function scanRoutes(app: FastifyInstance) {
         properties: {
           url: {
             type: "string",
+            format: "uri",
+            maxLength: 2048,
           },
         },
       },

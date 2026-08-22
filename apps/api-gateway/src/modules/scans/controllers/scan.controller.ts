@@ -1,6 +1,8 @@
 import { addScanJob } from "../../../queues/scan.queue.js";
 import { createChildLogger } from "../../../lib/logger.js";
 import { ok, fail } from "../../../utils/httpResponse.js";
+import { assertAllowedScanTarget } from "../../../security/target-policy.js";
+import { auditService } from "../../audit/audit.service.js";
 
 const logger = createChildLogger({ module: "scan-controller" });
 
@@ -8,17 +10,28 @@ export class ScanController {
   async create(request: any, reply: any) {
     try {
       const { url } = request.body;
-      const userId = (request.user as any)?.id;
+      const userId = request.user.id;
+      const target = await assertAllowedScanTarget(url);
 
       const job = await addScanJob({
-        url,
+        url: target.toString(),
         userId,
       });
 
-      logger.info({ jobId: job.id, url }, "Scan job created");
+      logger.info({ jobId: job.id, userId, targetHost: target.hostname }, "Scan job created");
+      await auditService.record({
+        actorId: userId,
+        tenantId: request.user.tenantId,
+        action: "scan.queue",
+        resourceType: "ScanJob",
+        resourceId: String(job.id),
+        requestId: request.id,
+        ipAddress: request.ip,
+        metadata: { targetHost: target.hostname, protocol: target.protocol },
+      });
 
       return reply.send(ok(
-        { jobId: job.id, target: url },
+        { jobId: job.id, target: target.toString() },
         "Scan added to queue"
       ));
     } catch (error) {

@@ -14,8 +14,134 @@ model User {
   scans     Scan[]
   incidents Incident[]
   alerts    AlertSubscription[]
+  role      UserRole @default(ANALYST)
+  auditLogs AuditLog[]
+  memberships TenantMembership[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Tenant {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  status      String   @default("active")
+  memberships TenantMembership[]
+  events      SecurityEvent[]
+  rules       DetectionRule[]
+  matches     DetectionMatch[]
+  auditLogs   AuditLog[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model TenantMembership {
+  id        String   @id @default(cuid())
+  tenantId  String
+  userId    String
+  role      UserRole @default(ANALYST)
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, userId])
+  @@index([userId])
+}
+
+enum UserRole {
+  ANALYST
+  ADMIN
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  actorId      String?
+  actor        User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  tenantId     String?
+  tenant       Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  action       String
+  resourceType String
+  resourceId   String?
+  outcome      String   @default("SUCCESS")
+  requestId    String?
+  ipAddress    String?
+  metadata     Json?
+  createdAt    DateTime @default(now())
+
+  @@index([actorId, createdAt])
+  @@index([tenantId, createdAt])
+  @@index([resourceType, resourceId])
+  @@index([action, createdAt])
+}
+
+model SecurityEvent {
+  id                 String   @id @default(cuid())
+  tenantId           String
+  tenant             Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  timestamp          DateTime
+  ingestionTimestamp DateTime @default(now())
+  source             String
+  sourceType         String
+  category           String
+  action             String
+  outcome            String?
+  severity           String   @default("informational")
+  host               Json?
+  user               Json?
+  process            Json?
+  network            Json?
+  file               Json?
+  cloud              Json?
+  rawEvent            Json
+  metadata            Json?
+  deduplicationKey    String
+  matches             DetectionMatch[]
+
+  @@unique([tenantId, deduplicationKey])
+  @@index([tenantId, timestamp])
+  @@index([tenantId, category, action])
+  @@index([tenantId, sourceType])
+}
+
+model DetectionRule {
+  id                 String   @id @default(cuid())
+  tenantId           String
+  tenant             Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name               String
+  description        String
+  version            Int      @default(1)
+  status             String   @default("draft")
+  severity           String
+  conditions         Json
+  dataSources        String[]
+  mitreTechniques    String[]
+  tags               String[]
+  authorId           String
+  falsePositiveNotes String?
+  references         String[]
+  matches            DetectionMatch[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([tenantId, name, version])
+  @@index([tenantId, status])
+}
+
+model DetectionMatch {
+  id        String        @id @default(cuid())
+  tenantId  String
+  tenant    Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  eventId   String
+  event     SecurityEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  ruleId    String
+  rule      DetectionRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  severity  String
+  reason    Json
+  createdAt DateTime      @default(now())
+
+  @@unique([eventId, ruleId])
+  @@index([tenantId, createdAt])
+  @@index([ruleId, createdAt])
 }
 
 model Scan {

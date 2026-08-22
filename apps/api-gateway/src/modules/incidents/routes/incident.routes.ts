@@ -6,10 +6,12 @@
 import type { FastifyInstance } from "fastify";
 import { IncidentController } from "../controllers/incident.controller.js";
 import { authMiddleware } from "../../middlewares/auth.middleware.js";
+import { requireRole } from "../../middlewares/authorization.middleware.js";
 
 const controller = new IncidentController();
 
 export async function incidentRoutes(app: FastifyInstance) {
+  app.addHook("preHandler", authMiddleware);
   /**
    * GET /incidents
    * Get all incidents for authenticated user
@@ -27,7 +29,6 @@ export async function incidentRoutes(app: FastifyInstance) {
         },
       },
     },
-    preHandler: authMiddleware,
     handler: controller.getUserIncidents.bind(controller),
   });
 
@@ -94,6 +95,7 @@ export async function incidentRoutes(app: FastifyInstance) {
         },
       },
     },
+    preHandler: requireRole("ADMIN"),
     handler: controller.getOpenIncidents.bind(controller),
   });
 
@@ -106,6 +108,7 @@ export async function incidentRoutes(app: FastifyInstance) {
       description: "Get incident statistics",
       tags: ["Incidents"],
     },
+    preHandler: requireRole("ADMIN"),
     handler: controller.getStats.bind(controller),
   });
 }

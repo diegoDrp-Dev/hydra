@@ -1,34 +1,53 @@
-# Dependências
+# Dependencies
 node_modules/
 .pnp
 .pnp.js
 
-# Variáveis de Ambiente (Segurança Crítica)
+# Environment and local secrets
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-apps/api-gateway/.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!.env.*.example
+!**/.env.example
+!**/.env.*.example
+.npmrc
+**/.npmrc
 
-# Build e Artefatos
+# Private keys, certificates and credential stores
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+credentials.json
+**/credentials.json
+service-account*.json
+**/service-account*.json
+
+# Build artifacts and generated clients
 dist/
 build/
 .turbo/
 .next/
 out/
+coverage/
+apps/api-gateway/src/generated/
 
 # Logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# IDEs e Editores
+# IDEs and operating systems
 .vscode/*
 !.vscode/extensions.json
 .idea/
-
-# Sistema Operacional
 .DS_Store
 Thumbs.db
+
+node_modules

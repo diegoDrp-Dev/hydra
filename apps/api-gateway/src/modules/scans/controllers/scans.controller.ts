@@ -9,6 +9,7 @@ export class ScansController {
   async findAll(request: any, reply: any) {
     try {
       const scans = await prisma.scan.findMany({
+        where: { userId: request.user.id },
         orderBy: {
           createdAt: "desc",
         },
@@ -26,10 +27,8 @@ export class ScansController {
     try {
       const { id } = request.params;
 
-      const scan = await prisma.scan.findUnique({
-        where: {
-          id,
-        },
+      const scan = await prisma.scan.findFirst({
+        where: { id, userId: request.user.id },
 
         include: {
           headers: true,

@@ -64,7 +64,7 @@ covering the full internal lifecycle of a SOC engine.
 
 ##  Architecture
 
-POST /scans
+POST /scan (JWT + target policy)
 ↓
 API Gateway (JWT auth + validation)
 ↓
@@ -82,7 +82,7 @@ SOC Dashboard (real-time update)
 
 | Layer | Responsibility |
 |-------|---------------|
-| **API Gateway** | Receives scans, JWT auth, request routing |
+| **API Gateway** | Receives authenticated scans, validates target scope, routes requests |
 | **Queue System** | BullMQ + Redis, exponential backoff, DLQ |
 | **Worker Engine** | Executes scans, triggers risk analysis |
 | **Risk Engine** | 0–100 scoring, 8 extensible rules, auto severity |
@@ -118,6 +118,22 @@ SOC Dashboard (real-time update)
 - Hash-based deduplication (hostname + risk signature)
 - Status tracking: `open` → `investigating` → `resolved`
 - Webhook alerts: Discord, Slack, Generic
+
+### Security baseline
+- Scan and incident APIs require JWT authentication
+- Scan and incident reads are isolated by owner
+- Private and reserved scan targets are blocked by default (SSRF protection)
+- Administrative incident views require the `ADMIN` role
+- Sensitive mutations produce persistent audit events
+- WebSocket incident streams are authenticated and isolated per user
+
+### Enterprise Event Core
+- Tenant workspace and membership isolation
+- Common normalized security event model
+- Idempotent ingestion with SHA-256 deduplication per tenant
+- Persisted, versioned detection rules with governed lifecycle
+- Explainable event-to-rule matches and MITRE technique metadata
+- Dataset testing with false-positive/false-negative counts
 
 ###  Distributed Queue
 - BullMQ + Redis

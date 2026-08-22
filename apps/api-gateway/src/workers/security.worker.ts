@@ -10,6 +10,8 @@ import { RiskService } from "../modules/risk-engine/services/risk.service.js";
 import { RiskRepository } from "../modules/risk-engine/repositories/risk.repository.js";
 import { IncidentService } from "../modules/incidents/services/incident.service.js";
 import { WebhookService } from "../modules/alerts/services/webhook.service.js";
+import { assertAllowedScanTarget } from "../security/target-policy.js";
+import { env } from "../config/env.js";
 
 const logger = createChildLogger({ module: "security-worker" });
 
@@ -37,7 +39,9 @@ const worker = new Worker(
   async (job) => {
     const { url, userId } = job.data;
 
+    await assertAllowedScanTarget(url);
     const targetUrl = resolveUrl(url);
+    await assertAllowedScanTarget(targetUrl);
 
     logger.info(
       {
@@ -58,7 +62,10 @@ const worker = new Worker(
 
       // HTTP REQUEST
       const response = await axios.get(targetUrl, {
-        timeout: 10000,
+        timeout: env.scanTimeoutMs,
+        maxRedirects: env.scanMaxRedirects,
+        maxContentLength: 1_000_000,
+        maxBodyLength: 1_000_000,
         validateStatus: () => true,
       });
 
@@ -146,6 +153,7 @@ const worker = new Worker(
         );
 
         if (incidentResult.isNewIncident) {
+          await redisConnection.publish("hydra:incidents", JSON.stringify(incident));
           const { sent, failed } =
             await webhookService.notifySubscribers(incident);
 

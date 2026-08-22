@@ -12,8 +12,8 @@ export async function authRoutes(app: FastifyInstance) {
         type: "object",
         required: ["email", "password"],
         properties: {
-          email: { type: "string" },
-          password: { type: "string" }
+          email: { type: "string", format: "email", maxLength: 254 },
+          password: { type: "string", minLength: 12, maxLength: 128 }
         }
       }
     },
@@ -26,8 +26,8 @@ export async function authRoutes(app: FastifyInstance) {
         type: "object",
         required: ["email", "password"],
         properties: {
-          email: { type: "string" },
-          password: { type: "string" }
+          email: { type: "string", format: "email", maxLength: 254 },
+          password: { type: "string", minLength: 1, maxLength: 128 }
         }
       }
     },
@@ -45,7 +45,7 @@ export async function authRoutes(app: FastifyInstance) {
     preHandler: authMiddleware,
     handler: async (request) => {
       return {
-        user: (request as any).user,
+        user: request.user,
       };
     },
   });

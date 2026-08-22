@@ -42,7 +42,7 @@ export class IncidentService {
   async generateFromScan(input: GenerateIncidentInput): Promise<any> {
     try {
       // Generate deduplication key
-      const deduplicationKey = generateDeduplicationKey(input.url, input.risks);
+      const deduplicationKey = generateDeduplicationKey(input.userId, input.url, input.risks);
 
       logger.info(
         { url: input.url, deduplicationKey },
@@ -82,6 +82,7 @@ export class IncidentService {
         deduplicationKey,
         scanId: input.scanId,
         userId: input.userId,
+        riskIds: (await this.riskRepository.getRisksByScan(input.scanId)).map((risk) => risk.id),
       };
 
       const newIncident =
@@ -108,6 +109,7 @@ export class IncidentService {
    */
   async updateStatus(
     incidentId: string,
+    userId: string,
     status: string
   ): Promise<any> {
     const validStatuses = ["open", "investigating", "resolved", "false_positive"];
@@ -116,14 +118,14 @@ export class IncidentService {
       throw new Error(`Invalid status: ${status}`);
     }
 
-    return this.incidentRepository.updateStatus(incidentId, status);
+    return this.incidentRepository.updateStatus(incidentId, userId, status);
   }
 
   /**
    * Get incident details
    */
-  async getIncident(incidentId: string): Promise<any> {
-    return this.incidentRepository.getById(incidentId);
+  async getIncident(incidentId: string, userId: string): Promise<any> {
+    return this.incidentRepository.getById(incidentId, userId);
   }
 
   /**

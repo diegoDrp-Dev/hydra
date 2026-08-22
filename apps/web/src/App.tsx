@@ -97,14 +97,27 @@ function score(status: number, duration: number) {
 }
 
 export default function App() {
+  const [token, setToken] = useState(() => localStorage.getItem("hydra_token") ?? "");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [authMode, setAuthMode] = useState<"login" | "register">("login");
+  const [authError, setAuthError] = useState("");
   const [scans, setScans] = useState<Scan[]>([]);
   const [pulse, setPulse] = useState(0);
   const wsRef = useRef<WebSocket | null>(null);
 
   // Load scans from REST API (memoized to keep effects stable)
   const loadScans = useCallback(async () => {
+    if (!token) return;
     try {
-      const res = await fetch("http://localhost:3000/scan");
+      const res = await fetch("http://localhost:3000/scan", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.status === 401) {
+        localStorage.removeItem("hydra_token");
+        setToken("");
+        return;
+      }
       const response = await res.json();
 
       console.log("API RAW:", response);
@@ -118,13 +131,40 @@ export default function App() {
     } catch (err) {
       console.error("FETCH ERROR:", err);
     }
-  }, []);
+  }, [token]);
+
+  const authenticate = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setAuthError("");
+    try {
+      const response = await fetch(`http://localhost:3000/auth/${authMode}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body?.error?.message ?? body?.message ?? "Authentication failed");
+
+      if (authMode === "register") {
+        setAuthMode("login");
+        setAuthError("Account created. Sign in to continue.");
+        return;
+      }
+      const nextToken = body?.data;
+      if (typeof nextToken !== "string") throw new Error("Invalid authentication response");
+      localStorage.setItem("hydra_token", nextToken);
+      setToken(nextToken);
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : "Authentication failed");
+    }
+  };
 
   // Initialize WebSocket connection
   useEffect(() => {
+    if (!token) return;
     const connectWebSocket = () => {
       try {
-        const ws = new WebSocket("ws://localhost:3000/ws");
+        const ws = new WebSocket("ws://localhost:3000/ws", ["hydra", token]);
 
         ws.onopen = () => {
           console.log("WebSocket connected");
@@ -170,10 +210,11 @@ export default function App() {
         wsRef.current = null;
       }
     };
-  }, [loadScans]);
+  }, [loadScans, token]);
 
   // Polling as fallback (if WebSocket not available)
   useEffect(() => {
+    if (!token) return;
     // Defer initial call to avoid cascading render warnings
     const timeoutId = setTimeout(loadScans, 0);
     const interval = setInterval(loadScans, 2500);
@@ -182,7 +223,7 @@ export default function App() {
       clearTimeout(timeoutId);
       clearInterval(interval);
     };
-  }, [loadScans]);
+  }, [loadScans, token]);
 
   useEffect(() => {
     console.log("SCANS STATE UPDATED:", scans.length);
@@ -228,6 +269,24 @@ export default function App() {
     return Math.round(total / scans.length);
   }, [scans]);
 
+  if (!token) {
+    return (
+      <div className="min-h-screen bg-black text-white font-mono flex items-center justify-center p-6">
+        <form onSubmit={authenticate} className="w-full max-w-md border border-cyan-500/30 bg-slate-950 p-8">
+          <h1 className="text-cyan-400 tracking-[0.25em] text-xl">HYDRA ACCESS</h1>
+          <p className="text-xs text-slate-500 mt-2 mb-8">SECURITY OPERATIONS CONSOLE</p>
+          <label className="block text-xs text-slate-400 mb-2">EMAIL</label>
+          <input className="w-full bg-black border border-white/15 p-3 mb-4 outline-none focus:border-cyan-400" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+          <label className="block text-xs text-slate-400 mb-2">PASSWORD</label>
+          <input className="w-full bg-black border border-white/15 p-3 mb-4 outline-none focus:border-cyan-400" type="password" value={password} onChange={(event) => setPassword(event.target.value)} minLength={authMode === "register" ? 12 : 1} required />
+          {authError && <p className="text-xs text-amber-400 mb-4">{authError}</p>}
+          <button className="w-full border border-cyan-400 text-cyan-300 p-3 hover:bg-cyan-400/10" type="submit">{authMode === "login" ? "AUTHENTICATE" : "CREATE ACCOUNT"}</button>
+          <button className="w-full text-xs text-slate-500 mt-4" type="button" onClick={() => setAuthMode(authMode === "login" ? "register" : "login")}>{authMode === "login" ? "Create an analyst account" : "Return to login"}</button>
+        </form>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black text-white font-mono p-6">
 
@@ -245,6 +304,7 @@ export default function App() {
         <div className="text-right">
           <p className="text-xs text-gray-500">GLOBAL RISK INDEX</p>
           <p className="text-3xl text-red-500">{globalRisk}</p>
+          <button className="text-[10px] text-slate-500 hover:text-cyan-400" onClick={() => { localStorage.removeItem("hydra_token"); setToken(""); }}>SIGN OUT</button>
         </div>
       </div>
 

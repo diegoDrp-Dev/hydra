@@ -39,9 +39,11 @@ services:
       DATABASE_URL: postgresql://${DB_USER:-hydra}:${DB_PASSWORD:-hydra}@postgres:5432/${DB_NAME:-hydra}
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      JWT_SECRET: ${JWT_SECRET:-development_secret_change_me_in_prod}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET to a strong random value}
       JWT_EXPIRES_IN: 24h
       LOG_LEVEL: debug
+      ALLOW_PRIVATE_SCAN_TARGETS: ${ALLOW_PRIVATE_SCAN_TARGETS:-false}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
     ports:
       - "3000:3000"
     depends_on:
@@ -68,6 +70,7 @@ services:
       REDIS_PORT: 6379
       WORKER_CONCURRENCY: 5
       LOG_LEVEL: debug
+      ALLOW_PRIVATE_SCAN_TARGETS: ${ALLOW_PRIVATE_SCAN_TARGETS:-false}
     depends_on:
       postgres:
         condition: service_healthy

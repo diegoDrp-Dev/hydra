@@ -5,6 +5,9 @@
 
 import { FastifyInstance } from "fastify";
 import { createChildLogger } from "../lib/logger.js";
+import jwt from "jsonwebtoken";
+import { requireJwtSecret } from "../config/env.js";
+import { redisConnection } from "../queues/redis.js";
 
 const logger = createChildLogger({ module: "websocket" });
 
@@ -25,17 +28,44 @@ export class WebSocketManager {
       });
     });
 
+    const subscriber = redisConnection.duplicate();
+    await subscriber.subscribe("hydra:incidents");
+    subscriber.on("message", (_channel: string, payload: string) => {
+      try {
+        this.broadcastIncident(JSON.parse(payload));
+      } catch (error) {
+        logger.error({ error }, "Invalid incident event received");
+      }
+    });
+    app.addHook("onClose", async () => {
+      await subscriber.quit();
+    });
+
     logger.info("WebSocket manager registered");
   }
 
   private handleConnection(socket: any, req: any): void {
-    const userId = req.user?.id || `anonymous-${Date.now()}`;
+    const protocols = String(req.headers?.["sec-websocket-protocol"] ?? "")
+      .split(",")
+      .map((value) => value.trim());
+    const token = protocols[0] === "hydra" ? protocols[1] : undefined;
+    let identity: { id: string; email: string };
+    try {
+      const decoded = jwt.verify(token ?? "", requireJwtSecret(), { algorithms: ["HS256"] });
+      if (typeof decoded === "string" || !decoded.id || !decoded.email) throw new Error("Invalid payload");
+      identity = { id: String(decoded.id), email: String(decoded.email) };
+    } catch {
+      socket.close(1008, "Authentication required");
+      return;
+    }
+
+    const userId = identity.id;
     const clientId = `${userId}-${Date.now()}`;
 
     const client: ConnectedClient = {
       ws: socket,
       userId,
-      rooms: new Set([this.incidentRoom]),
+      rooms: new Set([`${this.incidentRoom}:${userId}`]),
     };
 
     this.clients.set(clientId, client);
@@ -126,7 +156,9 @@ export class WebSocketManager {
 
     if (!client) return;
 
-    client.rooms.add(room);
+    const authorizedRoom = room === this.incidentRoom ? `${room}:${client.userId}` : null;
+    if (!authorizedRoom) return;
+    client.rooms.add(authorizedRoom);
 
     client.ws.send(
       JSON.stringify({
@@ -178,7 +210,7 @@ export class WebSocketManager {
     let count = 0;
 
     for (const [clientId, client] of this.clients) {
-      if (!client.rooms.has(this.incidentRoom)) continue;
+      if (client.userId !== incident.userId || !client.rooms.has(`${this.incidentRoom}:${client.userId}`)) continue;
 
       try {
         client.ws.send(message);

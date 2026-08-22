@@ -6,6 +6,7 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { createChildLogger } from "../../../lib/logger.js";
 import { IncidentService } from "../services/incident.service.js";
+import { auditService } from "../../audit/audit.service.js";
 
 const logger = createChildLogger({ module: "incident-controller" });
 
@@ -21,7 +22,7 @@ export class IncidentController {
    */
   async getUserIncidents(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const userId = (request as any).user?.id;
+      const userId = request.user!.id;
       const { status, severity } = request.query as any;
 
       if (!userId) {
@@ -57,7 +58,7 @@ export class IncidentController {
   async getIncident(request: FastifyRequest, reply: FastifyReply) {
     try {
       const { id } = request.params as any;
-      const incident = await this.incidentService.getIncident(id);
+      const incident = await this.incidentService.getIncident(id, request.user!.id);
 
       if (!incident) {
         return reply.status(404).send({
@@ -88,7 +89,18 @@ export class IncidentController {
       const { id } = request.params as any;
       const { status } = request.body as any;
 
-      const updated = await this.incidentService.updateStatus(id, status);
+      const updated = await this.incidentService.updateStatus(id, request.user!.id, status);
+
+      await auditService.record({
+        actorId: request.user!.id,
+        tenantId: request.user!.tenantId,
+        action: "incident.status.update",
+        resourceType: "Incident",
+        resourceId: id,
+        requestId: request.id,
+        ipAddress: request.ip,
+        metadata: { status },
+      });
 
       logger.info({ incidentId: id, newStatus: status }, "Incident updated");
       return reply.send({

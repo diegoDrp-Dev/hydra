@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { app } from "./app.js";
+import { env } from "./config/env.js";
 
 app.get("/", async () => {
   return { message: "Hydra API is alive" };
@@ -7,9 +8,8 @@ app.get("/", async () => {
 
 const start = async () => {
   try {
-    await app.listen({ port: 3000, host: "0.0.0.0" });
-    console.log("Hydra API running on http://localhost:3000");
-    console.log("Swagger docs on http://localhost:3000/docs");
+    await app.listen({ port: env.port, host: env.host });
+    app.log.info({ port: env.port, host: env.host }, "Hydra API started");
   } catch (err) {
     app.log.error(err);
     process.exit(1);

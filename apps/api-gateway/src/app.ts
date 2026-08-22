@@ -8,13 +8,19 @@ import { authRoutes } from "./modules/auth/routes/auth.routes.js";
 import { scanRoutes } from "./modules/scans/routes/scan.routes.js";
 import { incidentRoutes } from "./modules/incidents/routes/incident.routes.js";
 import { wsManager } from "./websocket/socket.js";
+import { AppError, errorBody } from "./errors/app-error.js";
+import { env } from "./config/env.js";
+import { eventRoutes } from "./modules/events/event.routes.js";
+import { detectionRoutes } from "./modules/detections/detection.routes.js";
 
 export const app = Fastify({
   logger: true,
 });
 
+app.decorateRequest("user", null);
+
 app.register(cors, {
-  origin: "http://localhost:5173",
+  origin: env.corsOrigins,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
 });
 
@@ -24,14 +30,23 @@ app.register(websocket);
 // GLOBAL ERROR HANDLER
 // ============================
 app.setErrorHandler((error, request, reply) => {
-  app.log.error({ error }, "Unhandled error");
+  if (error instanceof AppError) {
+    return reply.status(error.statusCode).send(errorBody(error.code, error.message, error.details));
+  }
+  const validation = typeof error === "object" && error !== null && "validation" in error
+    ? (error as { validation?: unknown }).validation
+    : undefined;
+  if (validation) {
+    return reply.status(400).send(errorBody("VALIDATION_ERROR", "Request validation failed", {
+      validation,
+    }));
+  }
 
-  return reply.status(500).send({
-    success: false,
-    message: "Internal server error",
-    data: []
-  });
+  request.log.error({ err: error }, "Unhandled error");
+  return reply.status(500).send(errorBody("INTERNAL_ERROR", "Internal server error"));
 });
+
+app.get("/health", async () => ({ status: "ok" }));
 
 // ============================
 // SWAGGER CONFIG
@@ -89,5 +104,8 @@ app.register(scanRoutes, {
 app.register(incidentRoutes, {
   prefix: "/incidents",
 });
+
+app.register(eventRoutes, { prefix: "/events" });
+app.register(detectionRoutes, { prefix: "/detections" });
 
 void wsManager.register(app);
