@@ -20,6 +20,13 @@
 
 ##  Quick Start
 
+### Windows: inicializador de um clique
+
+Execute `start-hydra.cmd` na raiz do projeto. O inicializador verifica ou abre o
+Docker Desktop, cria a configuracao local segura na primeira execucao, inicia
+todos os servicos, aguarda a API ficar pronta e abre o dashboard. Para encerrar
+sem apagar os dados, execute `stop-hydra.cmd`.
+
 ```bash
 git clone https://github.com/diegoDrp-Dev/hydra
 cd hydra
