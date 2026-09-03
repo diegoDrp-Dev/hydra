@@ -4,7 +4,7 @@ import RadarNode from './RadarNode';
 import RadarEdge from './RadarEdge';
 import RadarTooltip from './RadarTooltip';
 import { useRadarNodes } from './useRadarNodes';
-import type { Scan } from './App';
+import type { Scan } from './types';
 
 const SEVERITY_COLORS = {
     low: '#00ff88',

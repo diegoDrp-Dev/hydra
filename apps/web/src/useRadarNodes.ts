@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import type { Scan } from './App';
+import type { Scan } from './types';
 
 export interface RadarNode {
     id: string;
