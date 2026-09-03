@@ -11,6 +11,7 @@ import {
   Cell,
 } from "recharts";
 import NetworkRadar from "./NetworkRadar";
+import EnterpriseConsole from "./EnterpriseConsole";
 
 export type Scan = {
   id: string;
@@ -307,6 +308,8 @@ export default function App() {
           <button className="text-[10px] text-slate-500 hover:text-cyan-400" onClick={() => { localStorage.removeItem("hydra_token"); setToken(""); }}>SIGN OUT</button>
         </div>
       </div>
+
+      <EnterpriseConsole token={token} />
 
       {/* MAIN GRID */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

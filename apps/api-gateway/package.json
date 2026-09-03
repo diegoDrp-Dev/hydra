@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "worker": "tsx watch src/workers/security.worker.ts",
+    "worker:soar": "tsx watch src/workers/soar.worker.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "test": "npm run build && node --test --test-isolation=none tests/unit/*.test.mjs"

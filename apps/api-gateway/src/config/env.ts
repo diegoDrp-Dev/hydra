@@ -23,6 +23,7 @@ export const env = {
   allowPrivateScanTargets: booleanValue(process.env.ALLOW_PRIVATE_SCAN_TARGETS),
   scanTimeoutMs: integerValue(process.env.SCAN_TIMEOUT_MS, 10_000),
   scanMaxRedirects: integerValue(process.env.SCAN_MAX_REDIRECTS, 2),
+  soarExecutionEnabled: booleanValue(process.env.SOAR_EXECUTION_ENABLED),
 };
 
 export function requireJwtSecret(): string {

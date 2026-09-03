@@ -9,6 +9,10 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
+    "typecheck": "npm --workspace=api-gateway run typecheck && npm --workspace=web exec -- tsc -b",
+    "test": "npm --workspace=api-gateway test",
+    "lint": "npm --workspace=web run lint",
+    "validate": "npm run typecheck && npm run test && npm run lint && npm run build",
     "hydra:boot": "docker-compose up --build",
     "hydra:down": "docker-compose down --volumes"
   },

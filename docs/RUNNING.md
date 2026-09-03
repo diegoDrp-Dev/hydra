@@ -23,6 +23,7 @@ cp apps/api-gateway/.env.example apps/api-gateway/.env
 | `JWT_SECRET` | JWT signing key (required; 32+ characters in production) | none |
 | `ALLOW_PRIVATE_SCAN_TARGETS` | Allows private/loopback targets for an authorized local lab | `false` |
 | `CORS_ORIGINS` | Comma-separated browser origins | `http://localhost:5173` |
+| `SOAR_EXECUTION_ENABLED` | Global SOAR executor kill switch | `false` |
 
 ## Running with Docker (Recommended)
 
@@ -142,6 +143,31 @@ Authenticated tenant-scoped endpoints:
 | `POST` | `/detections` | Create a versioned rule (`ADMIN`) |
 | `POST` | `/detections/:id/test` | Test a rule against an in-memory dataset |
 | `PATCH` | `/detections/:id/status` | Governed lifecycle transition (`ADMIN`) |
+| `GET` | `/soc/alerts` | Explainable SOC alert queue |
+| `PATCH` | `/soc/alerts/:id/status` | Alert lifecycle and timeline update |
+| `GET/POST` | `/soc/cases` | Case management and alert grouping |
+| `POST` | `/soc/cases/:id/notes` | Append an analyst note |
+| `GET` | `/soc/entity-risks` | Tenant entity-risk ranking |
+| `GET/POST` | `/operations/threat-intel` | Local indicator registry |
+| `GET/POST` | `/operations/playbooks` | Governed playbook definitions |
+| `PATCH` | `/operations/playbooks/:id/status` | Playbook lifecycle (`ADMIN`) |
+| `POST` | `/operations/playbooks/:id/executions` | Idempotent approval request |
+| `POST` | `/operations/executions/:id/approve` | Human approval (`ADMIN`) |
+| `GET/POST` | `/correlations` | Temporal correlation rules |
+| `PATCH` | `/correlations/:id/status` | Enable or disable correlation (`ADMIN`) |
+| `GET` | `/soc/incidents` | Correlated SOC incidents |
+| `PATCH` | `/soc/incidents/:id/status` | Incident lifecycle |
+| `GET/PUT` | `/operations/feature-flags/:key` | Tenant feature governance |
+| `GET/PUT` | `/operations/retention/:resource` | Tenant retention policy |
+| `POST` | `/operations/retention/:resource/execute` | Confirmed retention execution |
+
+Operational endpoints are `/health`, `/ready`, and authenticated `/metrics`.
+
+The SOAR worker is a separate service. It only executes the built-in actions
+`create_case`, `add_case_note`, and `set_alert_status`. An execution requires an
+idempotency key and remains inert until an administrator approves it.
+The platform-level `SOAR_EXECUTION_ENABLED=true` kill switch must also be set;
+leaving it unset keeps every response action inert.
 
 Detection conditions support `equals`, `not_equals`, `contains`, `in`, `gte`,
 `lte`, and `exists` against normalized field paths such as `process.name`.

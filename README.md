@@ -134,6 +134,17 @@ SOC Dashboard (real-time update)
 - Persisted, versioned detection rules with governed lifecycle
 - Explainable event-to-rule matches and MITRE technique metadata
 - Dataset testing with false-positive/false-negative counts
+- First-class SOC alerts with explainable event/rule lineage
+- Dynamic entity-risk records for hosts, users, and network entities
+- Tenant-scoped cases, timelines, and analyst notes
+- Local threat-intelligence registry
+- Idempotent SOAR execution requests with mandatory human approval
+- Dependency readiness and authenticated operational metrics
+- Temporal correlation rules and automatically grouped SOC incidents
+- Redis-backed API rate limiting and defensive response headers
+- Feature flags and tenant-specific retention policies
+- Isolated BullMQ SOAR executor with an explicit action allowlist
+- Operational console for Alerts, Incidents, Cases, Risk, Detections, Intel, and SOAR
 
 ###  Distributed Queue
 - BullMQ + Redis

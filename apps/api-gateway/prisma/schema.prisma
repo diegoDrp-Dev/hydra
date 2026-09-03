@@ -31,6 +31,17 @@ model Tenant {
   rules       DetectionRule[]
   matches     DetectionMatch[]
   auditLogs   AuditLog[]
+  securityAlerts SecurityAlert[]
+  cases       CaseRecord[]
+  entityRisks EntityRisk[]
+  playbooks   Playbook[]
+  playbookExecutions PlaybookExecution[]
+  threatIndicators ThreatIndicator[]
+  correlationRules CorrelationRule[]
+  correlationSignals CorrelationSignal[]
+  socIncidents SocIncident[]
+  featureFlags FeatureFlag[]
+  retentionPolicies RetentionPolicy[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -138,10 +149,236 @@ model DetectionMatch {
   severity  String
   reason    Json
   createdAt DateTime      @default(now())
+  alert     SecurityAlert?
 
   @@unique([eventId, ruleId])
   @@index([tenantId, createdAt])
   @@index([ruleId, createdAt])
+}
+
+model SecurityAlert {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  severity    String
+  confidence  Int      @default(50)
+  riskScore   Int
+  status      String   @default("new")
+  source      String
+  ruleId      String?
+  eventId     String?
+  matchId     String?  @unique
+  match       DetectionMatch? @relation(fields: [matchId], references: [id], onDelete: SetNull)
+  entities    Json?
+  mitre       String[]
+  assigneeId  String?
+  caseId      String?
+  case        CaseRecord? @relation(fields: [caseId], references: [id], onDelete: SetNull)
+  incidentId  String?
+  incident    SocIncident? @relation(fields: [incidentId], references: [id], onDelete: SetNull)
+  timeline    TimelineEntry[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId, status, createdAt])
+  @@index([tenantId, severity])
+  @@index([tenantId, riskScore])
+}
+
+model CorrelationRule {
+  id            String   @id @default(cuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name          String
+  description   String
+  status        String   @default("draft")
+  windowMinutes Int
+  threshold     Int
+  groupBy       String
+  severities    String[]
+  outputSeverity String
+  mitreTechniques String[]
+  signals       CorrelationSignal[]
+  createdBy     String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([tenantId, name])
+  @@index([tenantId, status])
+}
+
+model CorrelationSignal {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  ruleId      String
+  rule        CorrelationRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  entityKey   String
+  alertIds    String[]
+  score       Int
+  incidentId  String?
+  incident    SocIncident? @relation(fields: [incidentId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  @@index([tenantId, createdAt])
+  @@index([ruleId, entityKey, createdAt])
+}
+
+model SocIncident {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  severity    String
+  priority    String
+  status      String   @default("new")
+  riskScore   Int
+  ownerId     String?
+  deduplicationKey String
+  alerts      SecurityAlert[]
+  signals     CorrelationSignal[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([tenantId, deduplicationKey])
+  @@index([tenantId, status, updatedAt])
+  @@index([tenantId, riskScore])
+}
+
+model CaseRecord {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  priority    String   @default("medium")
+  status      String   @default("open")
+  ownerId     String?
+  alerts      SecurityAlert[]
+  timeline    TimelineEntry[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId, status, updatedAt])
+}
+
+model TimelineEntry {
+  id        String   @id @default(cuid())
+  tenantId  String
+  caseId    String?
+  case      CaseRecord? @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  alertId   String?
+  alert     SecurityAlert? @relation(fields: [alertId], references: [id], onDelete: Cascade)
+  type      String
+  title     String
+  content   String?
+  actorId   String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([tenantId, createdAt])
+  @@index([caseId, createdAt])
+}
+
+model EntityRisk {
+  id         String   @id @default(cuid())
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  entityType String
+  entityKey  String
+  score      Int
+  reasons    Json
+  updatedAt  DateTime @updatedAt
+  createdAt  DateTime @default(now())
+
+  @@unique([tenantId, entityType, entityKey])
+  @@index([tenantId, score])
+}
+
+model Playbook {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  version     Int      @default(1)
+  status      String   @default("draft")
+  actions     Json
+  createdBy   String
+  executions  PlaybookExecution[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([tenantId, name, version])
+  @@index([tenantId, status])
+}
+
+model PlaybookExecution {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  playbookId  String
+  playbook    Playbook @relation(fields: [playbookId], references: [id], onDelete: Cascade)
+  status      String   @default("pending_approval")
+  requestedBy String
+  approvedBy  String?
+  input       Json?
+  result      Json?
+  idempotencyKey String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, status, createdAt])
+}
+
+model ThreatIndicator {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  type        String
+  value       String
+  confidence  Int
+  severity    String
+  source      String
+  validUntil  DateTime?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([tenantId, type, value, source])
+  @@index([tenantId, type, value])
+}
+
+model FeatureFlag {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  key       String
+  enabled   Boolean  @default(false)
+  config    Json?
+  updatedBy String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, key])
+}
+
+model RetentionPolicy {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  resource    String
+  retentionDays Int
+  enabled     Boolean  @default(true)
+  updatedBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([tenantId, resource])
 }
 
 model Scan {

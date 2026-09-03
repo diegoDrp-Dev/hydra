@@ -12,12 +12,30 @@ import { AppError, errorBody } from "./errors/app-error.js";
 import { env } from "./config/env.js";
 import { eventRoutes } from "./modules/events/event.routes.js";
 import { detectionRoutes } from "./modules/detections/detection.routes.js";
+import { socRoutes } from "./modules/soc/soc.routes.js";
+import { operationsRoutes } from "./modules/operations/operations.routes.js";
+import { prisma } from "./lib/prisma.js";
+import { redisConnection } from "./queues/redis.js";
+import { scanQueue } from "./queues/scan.queue.js";
+import { authMiddleware } from "./modules/middlewares/auth.middleware.js";
+import { requireRole } from "./modules/middlewares/authorization.middleware.js";
+import { correlationRoutes } from "./modules/correlation/correlation.routes.js";
+import { registerRateLimit } from "./modules/middlewares/rate-limit.middleware.js";
 
 export const app = Fastify({
   logger: true,
 });
 
 app.decorateRequest("user", null);
+void registerRateLimit(app);
+
+app.addHook("onSend", async (_request, reply, payload) => {
+  reply.header("X-Content-Type-Options", "nosniff");
+  reply.header("X-Frame-Options", "DENY");
+  reply.header("Referrer-Policy", "no-referrer");
+  reply.header("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  return payload;
+});
 
 app.register(cors, {
   origin: env.corsOrigins,
@@ -47,6 +65,24 @@ app.setErrorHandler((error, request, reply) => {
 });
 
 app.get("/health", async () => ({ status: "ok" }));
+app.get("/ready", async (_request, reply) => {
+  try {
+    await Promise.all([prisma.$queryRaw`SELECT 1`, redisConnection.ping()]);
+    return { status: "ready", dependencies: { postgres: "up", redis: "up" } };
+  } catch {
+    return reply.status(503).send(errorBody("NOT_READY", "One or more dependencies are unavailable"));
+  }
+});
+
+app.get("/metrics", { preHandler: [authMiddleware, requireRole("ADMIN")] }, async () => {
+  const jobs = await scanQueue.getJobCounts("waiting", "active", "completed", "failed", "delayed");
+  return {
+    process: { uptimeSeconds: Math.round(process.uptime()), memoryBytes: process.memoryUsage() },
+    queue: jobs,
+    websocketConnections: wsManager.getConnectedCount(),
+    timestamp: new Date().toISOString(),
+  };
+});
 
 // ============================
 // SWAGGER CONFIG
@@ -107,5 +143,8 @@ app.register(incidentRoutes, {
 
 app.register(eventRoutes, { prefix: "/events" });
 app.register(detectionRoutes, { prefix: "/detections" });
+app.register(socRoutes, { prefix: "/soc" });
+app.register(operationsRoutes, { prefix: "/operations" });
+app.register(correlationRoutes, { prefix: "/correlations" });
 
 void wsManager.register(app);
