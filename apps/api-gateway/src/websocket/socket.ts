@@ -29,6 +29,10 @@ export class WebSocketManager {
     });
 
     const subscriber = redisConnection.duplicate();
+    app.addHook("onClose", async () => {
+      await subscriber.quit();
+    });
+
     await subscriber.subscribe("hydra:incidents");
     subscriber.on("message", (_channel: string, payload: string) => {
       try {
@@ -36,9 +40,6 @@ export class WebSocketManager {
       } catch (error) {
         logger.error({ error }, "Invalid incident event received");
       }
-    });
-    app.addHook("onClose", async () => {
-      await subscriber.quit();
     });
 
     logger.info("WebSocket manager registered");
