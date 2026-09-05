@@ -18,6 +18,20 @@ const nav: Array<{ key: View; label: string; icon: string; group?: string }> = [
 const severityRank: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1, informational: 0 };
 const scoreOf = (scan: Scan) => scan.score ?? Math.min(100, (scan.statusCode ?? 200) >= 500 ? 80 : (scan.duration ?? 0) > 1000 ? 30 : 0);
 const hostOf = (url: string) => { try { return new URL(url).host; } catch { return url; } };
+const objectValue = (value: unknown) => value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
+const eventAssets = (events: ApiRecord[]): Scan[] => events.flatMap((event) => {
+  const host = objectValue(event.host); const network = objectValue(event.network);
+  const observed = [
+    ["host", host.name ?? host.id ?? host.domain],
+    ["source", network.sourceIp ?? network.ip],
+    ["destination", network.destinationIp],
+  ].filter((entry): entry is [string, string] => typeof entry[1] === "string" && entry[1].length > 0);
+  const severity = String(event.severity ?? "low"); const score = { critical: 95, high: 75, medium: 50, low: 25, informational: 10 }[severity] ?? 10;
+  return observed.map(([kind, asset]) => ({
+    id: `${event.id}-${kind}-${asset}`, url: `asset://${asset}`, createdAt: String(event.timestamp ?? event.createdAt ?? new Date().toISOString()),
+    severity: severity === "informational" ? "low" : severity, score, issues: [String(event.category ?? "telemetry"), String(event.action ?? "observed")],
+  }));
+});
 
 function SeverityBadge({ value }: { value?: unknown }) {
   const label = String(value ?? "unknown").toLowerCase();
@@ -40,7 +54,7 @@ export default function EnterpriseConsole({ token, onSignOut }: { token: string;
   const load = useCallback(async () => {
     setLoading(true); setError("");
     try {
-      const requested = view === "overview" ? Object.entries(endpoints).filter(([key]) => ["alerts", "incidents", "risks"].includes(key)) : [[view, endpoints[view]]];
+      const requested = view === "overview" ? Object.entries(endpoints).filter(([key]) => ["alerts", "incidents", "risks", "events"].includes(key)) : [[view, endpoints[view]]];
       const results = await Promise.all(requested.map(async ([key, path]) => {
         const response = await apiRequest<{ data: ApiRecord[] }>(token, path); return [key, response.data] as const;
       }));
@@ -75,6 +89,8 @@ export default function EnterpriseConsole({ token, onSignOut }: { token: string;
   const openIncidents = data.incidents.filter((item) => !["closed", "resolved"].includes(item.status)).length;
   const avgRisk = data.risks.length ? Math.round(data.risks.reduce((sum, item) => sum + item.score, 0) / data.risks.length) : 0;
   const trend = [...data.alerts].slice(0, 24).reverse().map((item, index) => ({ index, risk: item.riskScore, confidence: item.confidence }));
+  const radarTelemetry = [...data.scans, ...eventAssets(data.events)];
+  const activeAssets = new Set(radarTelemetry.map((item) => hostOf(item.url))).size;
 
   const mutateStatus = async (kind: "alerts" | "incidents", id: string, status: string) => {
     await apiRequest(token, `/soc/${kind}/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }); setSelected(null); await load();
@@ -100,12 +116,12 @@ export default function EnterpriseConsole({ token, onSignOut }: { token: string;
             <Metric label="Critical alerts" value={critical} note="Requires immediate triage" tone="critical" icon="△" />
             <Metric label="Open incidents" value={openIncidents} note={`${data.incidents.filter((i) => i.status === "investigating").length} under investigation`} tone="warning" icon="◆" />
             <Metric label="Entity risk" value={avgRisk} note="Average exposure score" tone="cyan" icon="◎" suffix="/100" />
-            <Metric label="Telemetry" value={data.scans.length} note="Recent active targets" tone="green" icon="⌁" />
+            <Metric label="Telemetry" value={activeAssets} note="Observed assets and targets" tone="green" icon="⌁" />
           </section>
           <section className="overview-grid">
             <div className="panel span-2"><PanelTitle title="Risk signal" subtitle="Latest alert risk and confidence" action="24 records" /><div className="chart-wrap">{trend.length ? <ResponsiveContainer width="100%" height="100%"><AreaChart data={trend}><defs><linearGradient id="riskFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#20d9d2" stopOpacity={0.28}/><stop offset="100%" stopColor="#20d9d2" stopOpacity={0}/></linearGradient></defs><CartesianGrid stroke="#1c2938" vertical={false}/><XAxis dataKey="index" hide/><YAxis domain={[0,100]} tick={{fill:"#64748b",fontSize:10}} axisLine={false} tickLine={false}/><Tooltip contentStyle={{background:"#0d1723",border:"1px solid #26384a",borderRadius:8}}/><Area type="monotone" dataKey="risk" stroke="#20d9d2" fill="url(#riskFill)" strokeWidth={2}/><Area type="monotone" dataKey="confidence" stroke="#7c8cff" fill="none" strokeDasharray="4 4"/></AreaChart></ResponsiveContainer> : <EmptyState text="No alert telemetry yet" />}</div></div>
             <div className="panel"><PanelTitle title="Priority queue" subtitle="Highest-risk alerts" action={`${data.alerts.length} total`} /><div className="priority-list">{data.alerts.slice(0,5).map((alert) => <button key={alert.id} onClick={() => { setView("alerts"); setSelected(alert); }}><span className={`risk-marker severity-bg-${alert.severity}`}>{alert.riskScore}</span><div><strong>{alert.title}</strong><small>{alert.source} · {timeAgo(alert.createdAt)}</small></div><SeverityBadge value={alert.severity}/></button>)}{!data.alerts.length && <EmptyState text="No active alerts" />}</div></div>
-            <div className="panel span-2 radar-panel"><PanelTitle title="Asset exposure map" subtitle="Recent scanner telemetry" action={`${data.scans.length} targets`} /><NetworkRadar scans={data.scans} helpers={{ extractHostname: hostOf, calculateScore: scoreOf, getSeverity: (scan) => scan.severity ?? (scoreOf(scan) >= 75 ? "critical" : "low") }} /></div>
+            <div className="panel span-2 radar-panel"><PanelTitle title="Asset exposure map" subtitle="Scanner and event telemetry" action={`${activeAssets} assets`} /><NetworkRadar scans={radarTelemetry} helpers={{ extractHostname: hostOf, calculateScore: scoreOf, getSeverity: (scan) => scan.severity ?? (scoreOf(scan) >= 75 ? "critical" : "low") }} /></div>
             <div className="panel"><PanelTitle title="Incident posture" subtitle="Open response workload" action="Live" /><div className="incident-stack">{data.incidents.slice(0,5).map((incident) => <button key={incident.id} onClick={() => { setView("incidents"); setSelected(incident); }}><div><strong>{incident.title}</strong><small>{incident.alerts?.length ?? 0} alerts · {timeAgo(incident.updatedAt)}</small></div><span>{incident.riskScore}</span></button>)}{!data.incidents.length && <EmptyState text="No correlated incidents" />}</div></div>
           </section>
         </> : <OperationalView view={view} rows={filtered} loading={loading} query={query} severity={severity} onQuery={setQuery} onSeverity={setSeverity} onSelect={setSelected} />}

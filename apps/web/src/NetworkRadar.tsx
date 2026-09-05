@@ -43,7 +43,7 @@ export const NetworkRadar: React.FC<Props> = ({ scans, helpers }) => {
             {nodes.length === 0 && (
                 <div className="absolute inset-0 flex items-center justify-center z-20">
                     <div className="text-cyan-500/40 text-xs tracking-widest animate-pulse font-mono">
-                        INITIALIZING DEFENSE GRID...
+                        WAITING FOR ASSET TELEMETRY...
                     </div>
                 </div>
             )}
@@ -102,7 +102,7 @@ export const NetworkRadar: React.FC<Props> = ({ scans, helpers }) => {
 
             {/* Footer Overlay */}
             <div className="absolute bottom-4 left-4 right-4 flex justify-between text-[8px] text-gray-500 font-mono pointer-events-none">
-                <span>{nodes.length} ACTIVE TARGETS TRACED</span>
+                <span>{nodes.length} ACTIVE ASSETS TRACED</span>
                 <span>GRID_REF: 42-SOC-HYDRA</span>
             </div>
         </div>
