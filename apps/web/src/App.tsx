@@ -3,6 +3,27 @@ import { API_BASE_URL } from "./lib/api";
 
 const EnterpriseConsole = lazy(() => import("./EnterpriseConsole"));
 
+type ValidationIssue = {
+  instancePath?: string;
+  keyword?: string;
+  params?: { limit?: number };
+};
+
+function authenticationError(body: unknown): string {
+  if (!body || typeof body !== "object") return "Authentication failed";
+  const response = body as {
+    message?: string;
+    error?: { message?: string; details?: { validation?: ValidationIssue[] } };
+  };
+  const issue = response.error?.details?.validation?.[0];
+  if (issue?.instancePath === "/email") return "Enter a valid email address, such as analyst@company.com.";
+  if (issue?.instancePath === "/password" && issue.keyword === "minLength") {
+    return `Password must contain at least ${issue.params?.limit ?? 12} characters.`;
+  }
+  if (issue?.instancePath === "/password") return "Password does not meet the security requirements.";
+  return response.error?.message ?? response.message ?? "Authentication failed";
+}
+
 export default function App() {
   const [token, setToken] = useState(() => localStorage.getItem("hydra_token") ?? "");
   const [email, setEmail] = useState("");
@@ -15,10 +36,10 @@ export default function App() {
     event.preventDefault(); setMessage(""); setSubmitting(true);
     try {
       const response = await fetch(`${API_BASE_URL}/auth/${mode}`, {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }),
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
       });
       const body = await response.json();
-      if (!response.ok) throw new Error(body?.error?.message ?? body?.message ?? "Authentication failed");
+      if (!response.ok) throw new Error(authenticationError(body));
       if (mode === "register") {
         setMode("login"); setMessage("Workspace created. Sign in to continue."); setPassword(""); return;
       }
@@ -45,8 +66,8 @@ export default function App() {
           <div className="auth-card-head"><div><p className="eyebrow">SECURE ACCESS</p><h2>{mode === "login" ? "Welcome back" : "Create workspace"}</h2></div><span className="status-dot online" /></div>
           <p className="muted">{mode === "login" ? "Authenticate to enter your operations console." : "Provision an isolated analyst workspace."}</p>
           <form onSubmit={authenticate}>
-            <label>Email address<input type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="analyst@company.com" required /></label>
-            <label>Password<input type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} minLength={mode === "register" ? 12 : 1} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••••••" required /></label>
+            <label>Email address<input type="email" autoComplete="email" pattern="[^\s@]+@[^\s@]+\.[^\s@]{2,}" title="Use a complete email address, such as analyst@company.com" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="analyst@company.com" required /></label>
+            <label>Password<input type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} minLength={mode === "register" ? 12 : 1} maxLength={128} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••••••" required />{mode === "register" && <small className="field-hint">Use at least 12 characters.</small>}</label>
             {message && <div className="form-message" role="status">{message}</div>}
             <button className="primary-button" disabled={submitting}>{submitting ? "Authenticating…" : mode === "login" ? "Enter operations console" : "Create secure workspace"}<span>→</span></button>
           </form>
