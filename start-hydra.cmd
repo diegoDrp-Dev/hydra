@@ -63,8 +63,12 @@ if errorlevel 1 (
 echo [4/5] Aguardando API, banco, Redis e workers...
 set /a api_wait=0
 :wait_api
-powershell -NoProfile -Command "try { $r=Invoke-RestMethod -Uri 'http://localhost:3000/ready' -TimeoutSec 3; $w=Invoke-WebRequest -UseBasicParsing -Uri 'http://localhost:5173' -TimeoutSec 3; if ($r.status -eq 'ready' -and $w.StatusCode -eq 200) { exit 0 } }; catch {}; exit 1" >nul 2>&1
+curl.exe --fail --silent --show-error --max-time 3 "http://localhost:3000/ready" >nul 2>&1
+if errorlevel 1 goto :wait_retry
+curl.exe --fail --silent --show-error --max-time 3 "http://localhost:5173" >nul 2>&1
 if not errorlevel 1 goto :api_ready
+
+:wait_retry
 timeout /t 3 /nobreak >nul
 set /a api_wait+=3
 if !api_wait! GEQ 180 (
