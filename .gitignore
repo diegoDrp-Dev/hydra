@@ -1,53 +1,111 @@
-# Dependencies
-node_modules/
+# Dependencies and package-manager state
+**/node_modules/
 .pnp
-.pnp.js
+.pnp.*
+.yarn/cache/
+.yarn/install-state.gz
+.yarn/unplugged/
+.pnpm-store/
 
-# Environment and local secrets
-.env
-.env.*
+# Environment, registries and local secrets
 **/.env
 **/.env.*
-!.env.example
-!.env.*.example
 !**/.env.example
 !**/.env.*.example
-.npmrc
+!**/.env.sample
+!**/.env.*.sample
+!**/.env.template
+!**/.env.*.template
 **/.npmrc
+**/.yarnrc.yml
 
-# Private keys, certificates and credential stores
+# Private keys, credentials and secret stores
 *.pem
 *.key
 *.p12
 *.pfx
 *.jks
 *.keystore
+*.kdbx
+id_rsa*
+id_ed25519*
 credentials.json
 **/credentials.json
 service-account*.json
 **/service-account*.json
+.aws/
+.azure/
+.config/gcloud/
 
-# Build artifacts and generated clients
-dist/
-build/
-.turbo/
-.next/
-out/
-coverage/
+# Builds, generated code and framework caches
+**/dist/
+**/build/
+**/out/
+**/.turbo/
+**/.next/
+**/.nuxt/
+**/.vite/
+**/.cache/
+**/.parcel-cache/
+*.tsbuildinfo
 apps/api-gateway/src/generated/
 
-# Logs
+# Tests, coverage and generated reports
+**/coverage/
+**/.nyc_output/
+**/test-results/
+**/playwright-report/
+**/blob-report/
+*.lcov
+*.sarif
+
+# Runtime data, databases, dumps and queues
+*.pid
+*.pid.lock
+*.seed
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.dump
+*.backup
+dumps/
+backups/
+
+# Logs, traces and captured traffic
 *.log
+*.log.*
+*.har
+*.trace
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Local Docker overrides (the canonical Compose file remains tracked)
+docker-compose.override.yml
+docker-compose.override.yaml
+compose.override.yml
+compose.override.yaml
+
+# Temporary and editor files
+**/tmp/
+**/temp/
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.eslintcache
+.stylelintcache
+
 # IDEs and operating systems
 .vscode/*
 !.vscode/extensions.json
 .idea/
+*.iml
 .DS_Store
+._*
 Thumbs.db
-
-node_modules
+Desktop.ini
+$RECYCLE.BIN/
