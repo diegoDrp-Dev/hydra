@@ -2,6 +2,9 @@
   "name": "koryn-security-platform",
   "private": true,
   "packageManager": "npm@11.11.0",
+  "engines": {
+    "node": ">=22"
+  },
   "workspaces": [
     "apps/*",
     "packages/*"
