@@ -83,7 +83,7 @@ export class AuthService {
     const token = jwt.sign(
       { id: user.id, email: user.email, role: membership.role, tenantId: membership.tenantId },
       requireJwtSecret(),
-      { algorithm: "HS256", expiresIn: env.jwtExpiresIn as jwt.SignOptions["expiresIn"] }
+      { algorithm: "HS256", expiresIn: env.jwtExpiresIn as jwt.SignOptions["expiresIn"], issuer: env.jwtIssuer, audience: env.jwtAudience }
     );
 
     return { token };

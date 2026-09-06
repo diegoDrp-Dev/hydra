@@ -6,7 +6,7 @@
 import { FastifyInstance } from "fastify";
 import { createChildLogger } from "../lib/logger.js";
 import jwt from "jsonwebtoken";
-import { requireJwtSecret } from "../config/env.js";
+import { env, requireJwtSecret } from "../config/env.js";
 import { redisConnection } from "../queues/redis.js";
 
 const logger = createChildLogger({ module: "websocket" });
@@ -15,6 +15,8 @@ interface ConnectedClient {
   ws: any;
   userId: string;
   rooms: Set<string>;
+  messageCount: number;
+  messageWindowStartedAt: number;
 }
 
 export class WebSocketManager {
@@ -33,7 +35,7 @@ export class WebSocketManager {
       await subscriber.quit();
     });
 
-    await subscriber.subscribe("hydra:incidents");
+    await subscriber.subscribe("koryn:incidents", "hydra:incidents");
     subscriber.on("message", (_channel: string, payload: string) => {
       try {
         this.broadcastIncident(JSON.parse(payload));
@@ -46,13 +48,18 @@ export class WebSocketManager {
   }
 
   private handleConnection(socket: any, req: any): void {
+    const origin = String(req.headers?.origin ?? "");
+    if (origin && !env.corsOrigins.includes(origin)) {
+      socket.close(1008, "Origin not allowed");
+      return;
+    }
     const protocols = String(req.headers?.["sec-websocket-protocol"] ?? "")
       .split(",")
       .map((value) => value.trim());
-    const token = protocols[0] === "hydra" ? protocols[1] : undefined;
+    const token = ["koryn", "hydra"].includes(protocols[0]) ? protocols[1] : undefined;
     let identity: { id: string; email: string };
     try {
-      const decoded = jwt.verify(token ?? "", requireJwtSecret(), { algorithms: ["HS256"] });
+      const decoded = jwt.verify(token ?? "", requireJwtSecret(), { algorithms: ["HS256"], issuer: env.jwtIssuer, audience: env.jwtAudience });
       if (typeof decoded === "string" || !decoded.id || !decoded.email) throw new Error("Invalid payload");
       identity = { id: String(decoded.id), email: String(decoded.email) };
     } catch {
@@ -67,6 +74,8 @@ export class WebSocketManager {
       ws: socket,
       userId,
       rooms: new Set([`${this.incidentRoom}:${userId}`]),
+      messageCount: 0,
+      messageWindowStartedAt: Date.now(),
     };
 
     this.clients.set(clientId, client);
@@ -80,6 +89,10 @@ export class WebSocketManager {
     );
 
     socket.on("message", (data: Buffer) => {
+      if (data.byteLength > 4096 || !this.allowClientMessage(clientId)) {
+        socket.close(1008, "Message policy violation");
+        return;
+      }
       this.handleMessage(clientId, data.toString());
     });
 
@@ -109,10 +122,22 @@ export class WebSocketManager {
     socket.send(
       JSON.stringify({
         type: "connection",
-        message: "Connected to Hydra Security Platform",
+        message: "Connected to Koryn Security Platform by HOJO",
         clientId,
       })
     );
+  }
+
+  private allowClientMessage(clientId: string): boolean {
+    const client = this.clients.get(clientId);
+    if (!client) return false;
+    const now = Date.now();
+    if (now - client.messageWindowStartedAt >= 60_000) {
+      client.messageWindowStartedAt = now;
+      client.messageCount = 0;
+    }
+    client.messageCount += 1;
+    return client.messageCount <= 60;
   }
 
   private handleMessage(clientId: string, message: string): void {

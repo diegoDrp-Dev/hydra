@@ -29,7 +29,7 @@ export const NetworkRadar: React.FC<Props> = ({ scans, helpers }) => {
     const hoveredNode = nodes.find(n => n.id === hoveredId);
 
     return (
-        <div className="relative w-full h-[320px] bg-[#050a14] rounded-lg border border-white/5 overflow-hidden group">
+        <div className="relative w-full h-[320px] bg-[#050a14] rounded-lg border border-white/5 group">
             {/* Header Overlay */}
             <div className="absolute top-4 left-4 z-10 flex items-center gap-3">
                 <span className="text-[10px] tracking-[0.2em] text-cyan-500/80 font-bold uppercase">Network Interception Radar</span>
@@ -103,7 +103,7 @@ export const NetworkRadar: React.FC<Props> = ({ scans, helpers }) => {
             {/* Footer Overlay */}
             <div className="absolute bottom-4 left-4 right-4 flex justify-between text-[8px] text-gray-500 font-mono pointer-events-none">
                 <span>{nodes.length} ACTIVE ASSETS TRACED</span>
-                <span>GRID_REF: 42-SOC-HYDRA</span>
+                <span>GRID_REF: HOJO-KORYN-42</span>
             </div>
         </div>
     );

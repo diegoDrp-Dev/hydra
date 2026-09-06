@@ -8,6 +8,7 @@ import { prisma } from "../../../lib/prisma.js";
 import { DiscordAdapter } from "../adapters/discord.adapter.js";
 import { SlackAdapter } from "../adapters/slack.adapter.js";
 import { GenericAdapter } from "../adapters/generic.adapter.js";
+import { assertAllowedWebhookUrl } from "../../../security/webhook-policy.js";
 
 const logger = createChildLogger({ module: "webhook-service" });
 
@@ -27,6 +28,7 @@ export class WebhookService {
    */
   async sendNotification(payload: WebhookPayload): Promise<boolean> {
     try {
+      await assertAllowedWebhookUrl(payload.webhookUrl);
       let result;
 
       switch (payload.webhookType.toLowerCase()) {
@@ -105,6 +107,7 @@ export class WebhookService {
     severities: string[] = ["critical", "high"]
   ): Promise<any> {
     try {
+      await assertAllowedWebhookUrl(webhookUrl);
       const subscription = await prisma.alertSubscription.upsert({
         where: {
           userId_webhookUrl: {

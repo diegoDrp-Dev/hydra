@@ -58,7 +58,7 @@ export class SlackAdapter {
         ],
       };
 
-      const response = await axios.post(payload.webhookUrl, message);
+      const response = await axios.post(payload.webhookUrl, message, { timeout: 10000, maxRedirects: 0, maxContentLength: 256_000, maxBodyLength: 256_000 });
 
       logger.info(
         { incidentId: payload.incidentId, statusCode: response.status },

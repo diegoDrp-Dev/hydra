@@ -124,6 +124,7 @@ export class IncidentController {
     try {
       const { limit } = request.query as any;
       const incidents = await this.incidentService.getOpenIncidents(
+        request.user!.tenantId,
         limit ? parseInt(limit) : 10
       );
 
@@ -147,7 +148,7 @@ export class IncidentController {
    */
   async getStats(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const stats = await this.incidentService.getStats();
+      const stats = await this.incidentService.getStats(request.user!.tenantId);
 
       logger.info({ stats }, "Incident statistics fetched");
       return reply.send({

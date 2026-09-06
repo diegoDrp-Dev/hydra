@@ -28,7 +28,7 @@ export async function addScanJob(data: {
     logger.info(
       {
         jobId: job.id,
-        url: data.url,
+        targetHost: new URL(data.url).hostname,
       },
       "Scan job added"
     );

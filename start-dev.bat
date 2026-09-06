@@ -1,2 +1,2 @@
 @echo off
-call "%~dp0start-hydra.cmd"
+call "%~dp0start-koryn.cmd"

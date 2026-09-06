@@ -10,6 +10,7 @@ export async function authRoutes(app: FastifyInstance) {
     schema: {
       body: {
         type: "object",
+        additionalProperties: false,
         required: ["email", "password"],
         properties: {
           email: { type: "string", format: "email", maxLength: 254 },
@@ -24,6 +25,7 @@ export async function authRoutes(app: FastifyInstance) {
     schema: {
       body: {
         type: "object",
+        additionalProperties: false,
         required: ["email", "password"],
         properties: {
           email: { type: "string", format: "email", maxLength: 254 },

@@ -10,6 +10,7 @@ const isDevelopment = process.env.NODE_ENV === "development" || !process.env.NOD
 export const logger = pino(
   {
     level: process.env.LOG_LEVEL || (isDevelopment ? "debug" : "info"),
+    redact: ["req.headers.authorization", "req.headers.cookie", "password", "token", "*.password", "*.token", "*.authorization"],
     timestamp: pino.stdTimeFunctions.isoTime,
     transport: isDevelopment
       ? {

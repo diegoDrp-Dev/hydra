@@ -23,9 +23,10 @@ export async function incidentRoutes(app: FastifyInstance) {
       security: [{ bearerAuth: [] }],
       querystring: {
         type: "object",
+        additionalProperties: false,
         properties: {
-          status: { type: "string" },
-          severity: { type: "string" },
+          status: { type: "string", enum: ["open", "investigating", "resolved", "false_positive"] },
+          severity: { type: "string", enum: ["low", "medium", "high", "critical"] },
         },
       },
     },
@@ -42,6 +43,7 @@ export async function incidentRoutes(app: FastifyInstance) {
       tags: ["Incidents"],
       params: {
         type: "object",
+        additionalProperties: false,
         required: ["id"],
         properties: {
           id: { type: "string" },
@@ -61,6 +63,7 @@ export async function incidentRoutes(app: FastifyInstance) {
       tags: ["Incidents"],
       params: {
         type: "object",
+        additionalProperties: false,
         required: ["id"],
         properties: {
           id: { type: "string" },
@@ -68,6 +71,7 @@ export async function incidentRoutes(app: FastifyInstance) {
       },
       body: {
         type: "object",
+        additionalProperties: false,
         required: ["status"],
         properties: {
           status: {
@@ -90,8 +94,9 @@ export async function incidentRoutes(app: FastifyInstance) {
       tags: ["Incidents"],
       querystring: {
         type: "object",
+        additionalProperties: false,
         properties: {
-          limit: { type: "string" },
+          limit: { type: "string", pattern: "^(?:[1-9]|[1-9][0-9]|100)$" },
         },
       },
     },

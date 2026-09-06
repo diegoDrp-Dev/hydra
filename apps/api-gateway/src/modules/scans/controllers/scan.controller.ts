@@ -3,6 +3,7 @@ import { createChildLogger } from "../../../lib/logger.js";
 import { ok, fail } from "../../../utils/httpResponse.js";
 import { assertAllowedScanTarget } from "../../../security/target-policy.js";
 import { auditService } from "../../audit/audit.service.js";
+import { AppError } from "../../../errors/app-error.js";
 
 const logger = createChildLogger({ module: "scan-controller" });
 
@@ -35,6 +36,7 @@ export class ScanController {
         "Scan added to queue"
       ));
     } catch (error) {
+      if (error instanceof AppError) throw error;
       logger.error({ error }, "Failed to create scan job");
       return reply.status(500).send(fail("Failed to queue scan", 500));
     }

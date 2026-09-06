@@ -1,6 +1,18 @@
 import { lazy, Suspense, useState } from "react";
 import { API_BASE_URL } from "./lib/api";
 
+const SESSION_TOKEN_KEY = "koryn_token";
+const LEGACY_TOKEN_KEY = "hydra_token";
+
+function restoreSessionToken() {
+  const current = sessionStorage.getItem(SESSION_TOKEN_KEY);
+  if (current) return current;
+  const legacy = localStorage.getItem(LEGACY_TOKEN_KEY);
+  if (legacy) sessionStorage.setItem(SESSION_TOKEN_KEY, legacy);
+  localStorage.removeItem(LEGACY_TOKEN_KEY);
+  return legacy ?? "";
+}
+
 const EnterpriseConsole = lazy(() => import("./EnterpriseConsole"));
 
 type ValidationIssue = {
@@ -25,7 +37,7 @@ function authenticationError(body: unknown): string {
 }
 
 export default function App() {
-  const [token, setToken] = useState(() => localStorage.getItem("hydra_token") ?? "");
+  const [token, setToken] = useState(restoreSessionToken);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<"login" | "register">("login");
@@ -44,19 +56,19 @@ export default function App() {
         setMode("login"); setMessage("Workspace created. Sign in to continue."); setPassword(""); return;
       }
       if (typeof body?.data !== "string") throw new Error("Invalid authentication response");
-      localStorage.setItem("hydra_token", body.data); setToken(body.data);
+      sessionStorage.setItem(SESSION_TOKEN_KEY, body.data); setToken(body.data);
     } catch (error) { setMessage(error instanceof Error ? error.message : "Authentication failed"); }
     finally { setSubmitting(false); }
   };
 
-  if (token) return <Suspense fallback={<main className="app-loading"><div className="brand-mark"><span>H</span></div><p>Loading secure workspace…</p></main>}><EnterpriseConsole token={token} onSignOut={() => { localStorage.removeItem("hydra_token"); setToken(""); }} /></Suspense>;
+  if (token) return <Suspense fallback={<main className="app-loading"><div className="brand-mark"><span>K</span></div><p>Loading secure workspace…</p></main>}><EnterpriseConsole token={token} onSignOut={() => { sessionStorage.removeItem(SESSION_TOKEN_KEY); localStorage.removeItem(LEGACY_TOKEN_KEY); setToken(""); }} /></Suspense>;
 
   return (
     <main className="auth-shell">
       <div className="auth-atmosphere" />
       <section className="auth-brand">
-        <div className="brand-mark large"><span>H</span></div>
-        <p className="eyebrow">HYDRA ENTERPRISE</p>
+        <div className="brand-mark large"><span>K</span></div>
+        <p className="eyebrow">KORYN SECURITY · BY HOJO</p>
         <h1>Security operations,<br /><em>under control.</em></h1>
         <p className="auth-copy">One workspace for detection, investigation, intelligence and governed response.</p>
         <div className="trust-row"><span>Tenant isolated</span><span>Auditable</span><span>Defense-first</span></div>
@@ -73,7 +85,7 @@ export default function App() {
           </form>
           <button className="text-button" onClick={() => { setMode(mode === "login" ? "register" : "login"); setMessage(""); }}>{mode === "login" ? "Need an analyst workspace? Create one" : "Already provisioned? Sign in"}</button>
         </div>
-        <p className="auth-footnote">Protected by tenant-scoped access controls · HYDRA SOC</p>
+        <p className="auth-footnote">Protected by tenant-scoped access controls · KORYN SECURITY PLATFORM</p>
       </section>
     </main>
   );

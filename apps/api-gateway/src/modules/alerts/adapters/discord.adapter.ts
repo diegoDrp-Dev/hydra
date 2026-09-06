@@ -55,10 +55,10 @@ export class DiscordAdapter {
 
       const response = await axios.post(payload.webhookUrl, {
         embeds: [embed],
-        username: "Hydra Security Alerts",
+        username: "Koryn Security Alerts by HOJO",
         avatar_url:
           "https://raw.githubusercontent.com/containerd/containerd/main/logo/png/containerd-horizontal-color.png",
-      });
+      }, { timeout: 10000, maxRedirects: 0, maxContentLength: 256_000, maxBodyLength: 256_000 });
 
       logger.info(
         { incidentId: payload.incidentId, statusCode: response.status },

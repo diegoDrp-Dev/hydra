@@ -159,10 +159,10 @@ export class IncidentRepository {
   /**
    * Get open incidents
    */
-  async getOpenIncidents(limit: number = 10): Promise<IncidentWithRelations[]> {
+  async getOpenIncidents(tenantId: string, limit: number = 10): Promise<IncidentWithRelations[]> {
     try {
       const incidents = await prisma.incident.findMany({
-        where: { status: "open" },
+        where: { status: "open", user: { memberships: { some: { tenantId } } } },
         take: limit,
         orderBy: [{ riskScore: "desc" }, { createdAt: "desc" }],
         include: { risks: true, scan: true, alerts: true },
@@ -178,13 +178,15 @@ export class IncidentRepository {
   /**
    * Get incident statistics
    */
-  async getStats(): Promise<{
+  async getStats(tenantId: string): Promise<{
     total: number;
     byStatus: Record<string, number>;
     bySeverity: Record<string, number>;
   }> {
     try {
-      const incidents = await prisma.incident.findMany();
+      const incidents = await prisma.incident.findMany({
+        where: { user: { memberships: { some: { tenantId } } } },
+      });
 
       const byStatus: Record<string, number> = {
         open: 0,
@@ -201,8 +203,8 @@ export class IncidentRepository {
       };
 
       incidents.forEach((incident: any) => {
-        byStatus[incident.status]++;
-        bySeverity[incident.severity]++;
+        byStatus[incident.status] = (byStatus[incident.status] ?? 0) + 1;
+        bySeverity[incident.severity] = (bySeverity[incident.severity] ?? 0) + 1;
       });
 
       return {

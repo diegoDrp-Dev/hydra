@@ -1,9 +1,9 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import jwt from "jsonwebtoken";
 import { errorBody } from "../../errors/app-error.js";
-import { requireJwtSecret } from "../../config/env.js";
+import { env, requireJwtSecret } from "../../config/env.js";
 
-interface HydraJwtPayload extends jwt.JwtPayload {
+interface KorynJwtPayload extends jwt.JwtPayload {
   id: string;
   email: string;
   role?: "ANALYST" | "ADMIN";
@@ -30,8 +30,8 @@ export async function authMiddleware(
     const decoded = jwt.verify(
       token,
       requireJwtSecret(),
-      { algorithms: ["HS256"] },
-    ) as HydraJwtPayload;
+      { algorithms: ["HS256"], issuer: env.jwtIssuer, audience: env.jwtAudience },
+    ) as KorynJwtPayload;
 
     if (!decoded.id || !decoded.email || !decoded.tenantId) throw new Error("Invalid token payload");
     request.user = {

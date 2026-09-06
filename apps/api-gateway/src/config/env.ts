@@ -16,6 +16,8 @@ export const env = {
   host: process.env.HOST ?? "0.0.0.0",
   jwtSecret: process.env.JWT_SECRET,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? "1h",
+  jwtIssuer: process.env.JWT_ISSUER ?? "koryn-security-platform",
+  jwtAudience: process.env.JWT_AUDIENCE ?? "koryn-console",
   corsOrigins: (process.env.CORS_ORIGINS ?? "http://localhost:5173")
     .split(",")
     .map((origin) => origin.trim())
@@ -24,6 +26,7 @@ export const env = {
   scanTimeoutMs: integerValue(process.env.SCAN_TIMEOUT_MS, 10_000),
   scanMaxRedirects: integerValue(process.env.SCAN_MAX_REDIRECTS, 2),
   soarExecutionEnabled: booleanValue(process.env.SOAR_EXECUTION_ENABLED),
+  webhookAllowPrivateTargets: booleanValue(process.env.WEBHOOK_ALLOW_PRIVATE_TARGETS),
 };
 
 export function requireJwtSecret(): string {

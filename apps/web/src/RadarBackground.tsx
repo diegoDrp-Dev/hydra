@@ -15,8 +15,8 @@ const RadarBackground: React.FC = () => {
             <circle cx="400" cy="250" r="150" fill="none" stroke="#1e3a5f" strokeWidth="1" opacity="0.3" />
             <circle cx="400" cy="250" r="225" fill="none" stroke="#1e3a5f" strokeWidth="1" opacity="0.2" />
 
-            {/* Centro Hydra */}
-            <text x="400" y="240" textAnchor="middle" fill="#00ffff" fontSize="10" opacity="0.5" letterSpacing="2">HYDRA</text>
+            {/* Koryn platform center marker */}
+            <text x="400" y="240" textAnchor="middle" fill="#00ffff" fontSize="10" opacity="0.5" letterSpacing="2">KORYN</text>
             <circle cx="400" cy="250" r="4" fill="#00ffff" />
 
             {/* Radar Sweep (Linha Giratória) */}

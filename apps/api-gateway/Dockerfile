@@ -18,6 +18,9 @@ COPY apps/api-gateway/prisma ./apps/api-gateway/prisma
 # Generate Prisma client
 RUN cd apps/api-gateway && npx prisma generate
 
+RUN chown -R node:node /app
+USER node
+
 EXPOSE 3000
 
 # No desenvolvimento, o código é montado via volume, 

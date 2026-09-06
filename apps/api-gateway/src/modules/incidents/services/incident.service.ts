@@ -141,15 +141,15 @@ export class IncidentService {
   /**
    * Get open incidents
    */
-  async getOpenIncidents(limit?: number): Promise<any[]> {
-    return this.incidentRepository.getOpenIncidents(limit);
+  async getOpenIncidents(tenantId: string, limit?: number): Promise<any[]> {
+    return this.incidentRepository.getOpenIncidents(tenantId, limit);
   }
 
   /**
    * Get incident statistics
    */
-  async getStats(): Promise<any> {
-    return this.incidentRepository.getStats();
+  async getStats(tenantId: string): Promise<any> {
+    return this.incidentRepository.getStats(tenantId);
   }
 
   /**

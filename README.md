@@ -1,255 +1,46 @@
-# HYDRA 
-### Real-Time Security Operations Center (SOC) Platform
+# Koryn Security Platform
 
-![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178c6?style=flat&logo=typescript)
-![Node.js](https://img.shields.io/badge/Node.js-22-339933?style=flat&logo=node.js)
-![Fastify](https://img.shields.io/badge/Fastify-5.3-000000?style=flat&logo=fastify)
-![Redis](https://img.shields.io/badge/Redis-7-dc382d?style=flat&logo=redis)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169e1?style=flat&logo=postgresql)
-![Docker](https://img.shields.io/badge/Docker-ready-2496ed?style=flat&logo=docker)
-![License](https://img.shields.io/badge/License-MIT-yellow?style=flat)
-![Status](https://img.shields.io/badge/Status-Active%20Development-22c55e?style=flat)
+**Koryn Security Platform**, uma solução HOJO, é uma plataforma defensiva de operações de segurança para ingestão de telemetria, detecção, priorização de risco, investigação de incidentes e automação SOAR governada.
 
-> Distributed security monitoring platform for real-time threat detection,
-> risk scoring, and incident visualization — built from scratch as a
-> production-style SOC engine.
+## Início rápido no Windows
 
-![Hydra Demo](./docs/demo.gif)
+1. Instale e abra o Docker Desktop.
+2. Execute `start-koryn.cmd`.
+3. Acesse <http://localhost:5173>.
 
----
+O inicializador cria um segredo JWT aleatório quando ainda não existe `.env`, sobe PostgreSQL, Redis, API, workers e frontend e aguarda os health checks. Para encerrar preservando os volumes, execute `stop-koryn.cmd`.
 
-##  Quick Start
-
-### Windows: inicializador de um clique
-
-Execute `start-hydra.cmd` na raiz do projeto. O inicializador verifica ou abre o
-Docker Desktop, cria a configuracao local segura na primeira execucao, inicia
-todos os servicos, aguarda a API ficar pronta e abre o dashboard. Para encerrar
-sem apagar os dados, execute `stop-hydra.cmd`.
+## Comandos
 
 ```bash
-git clone https://github.com/diegoDrp-Dev/hydra
-cd hydra
 npm install
-cp apps/api-gateway/.env.example apps/api-gateway/.env
+npm run validate
+npm run koryn:boot
+npm run koryn:down
 ```
 
-**Boot (Docker — recommended):**
-```bash
-docker compose down --remove-orphans -v
-docker compose up -d --build
-npx prisma migrate deploy
-```
+Endpoints locais:
 
-Sobe: PostgreSQL + Redis + API + Worker + Frontend.
+- Console: <http://localhost:5173>
+- API: <http://localhost:3000>
+- OpenAPI: <http://localhost:3000/docs>
+- Saúde: <http://localhost:3000/ready>
 
-| Service | URL |
-|---------|-----|
-| Dashboard | http://localhost:5173 |
-| API | http://localhost:3000 |
-| Docs | http://localhost:3000/docs |
-| WebSocket | ws://localhost:3000/ws |
+## Arquitetura
 
+O monorepo contém o console React/Vite, uma API Fastify/TypeScript, PostgreSQL com Prisma, Redis/BullMQ, workers de detecção e SOAR e notificações em tempo real via WebSocket. Todos os recursos SOC modernos carregam `tenantId` e são filtrados pelo tenant autenticado.
 
-> To simulate attacks in real time, see
-> **[hydra-lab](https://github.com/diegoDrp-Dev/hydra-lab)** —
-> a separate repository with intentionally vulnerable targets
-> built to stress-test this system.
+Consulte [ARCHITECTURE.md](./ARCHITECTURE.md), [docs/RUNNING.md](./docs/RUNNING.md) e [SECURITY_REVIEW.md](./SECURITY_REVIEW.md).
 
----
+## Laboratório e dados vazios
 
-##  Overview
+O mapa e as tabelas exibem somente telemetria pertencente ao tenant da sessão. Se “Casos” estiver vazio, crie um caso pela API ou execute o seed do laboratório com as mesmas credenciais do usuário do console. Um token de outro tenant não é aceito como fonte de dados.
 
-Hydra is a **real-time SOC platform** that simulates how enterprise
-security systems detect, score, and respond to threats.
+## Migração de identidade
 
-It processes security events through a distributed pipeline — from raw
-HTTP scan to risk-scored incident with real-time dashboard update —
-covering the full internal lifecycle of a SOC engine.
+Esta plataforma era conhecida anteriormente por outro nome. Identificadores internos antigos de banco, canal WebSocket, Redis e armazenamento do navegador são mantidos apenas durante a janela de compatibilidade descrita em [MIGRATION_KORYN.md](./MIGRATION_KORYN.md). A identidade pública e visual oficial é Koryn Security Platform by HOJO.
 
----
+## Segurança
 
-##  Architecture
-
-POST /scan (JWT + target policy)
-↓
-API Gateway (JWT auth + validation)
-↓
-BullMQ Queue (retry + backoff + DLQ)
-↓
-Worker Engine (HTTP scan + header analysis)
-↓
-Risk Engine (score 0–100 + severity + rules)
-↓
-Incident Manager (auto-generate + dedup)
-↓
-PostgreSQL (persist) + WebSocket (broadcast)
-↓
-SOC Dashboard (real-time update)
-
-| Layer | Responsibility |
-|-------|---------------|
-| **API Gateway** | Receives authenticated scans, validates target scope, routes requests |
-| **Queue System** | BullMQ + Redis, exponential backoff, DLQ |
-| **Worker Engine** | Executes scans, triggers risk analysis |
-| **Risk Engine** | 0–100 scoring, 8 extensible rules, auto severity |
-| **Incident Manager** | Auto-generation, hash-based dedup, status tracking |
-| **Database** | PostgreSQL + Prisma — scans, incidents, risks, alerts |
-| **Frontend** | React SOC dashboard, WebSocket, custom SVG Network Radar |
-
----
-
-##  Core Features
-
-###  Risk Engine
-- 8 built-in security rules (CSP, HSTS, X-Frame-Options, auth strength...)
-- Dynamic 0–100 normalized scoring
-- Automatic severity classification: `low` → `medium` → `high` → `critical`
-- Extensible rule registry — add new rules without redeploy
-
-###  Real-Time Monitoring
-- Primary WebSocket stream
-- Polling fallback (resilient mode)
-- Live incident feed with automatic deduplication
-- Continuous dashboard synchronization
-
-###  Network Interception Radar
-- Custom SVG visualization (no D3 or external libs)
-- Severity-based pulsing nodes
-- Animated radar sweep (Darktrace-style)
-- Per-node tooltip with scan details
-- Deterministic positioning by hostname (golden angle algorithm)
-
-###  Incident Management
-- Auto-generation from scan results
-- Hash-based deduplication (hostname + risk signature)
-- Status tracking: `open` → `investigating` → `resolved`
-- Webhook alerts: Discord, Slack, Generic
-
-### Security baseline
-- Scan and incident APIs require JWT authentication
-- Scan and incident reads are isolated by owner
-- Private and reserved scan targets are blocked by default (SSRF protection)
-- Administrative incident views require the `ADMIN` role
-- Sensitive mutations produce persistent audit events
-- WebSocket incident streams are authenticated and isolated per user
-
-### Enterprise Event Core
-- Tenant workspace and membership isolation
-- Common normalized security event model
-- Idempotent ingestion with SHA-256 deduplication per tenant
-- Persisted, versioned detection rules with governed lifecycle
-- Explainable event-to-rule matches and MITRE technique metadata
-- Dataset testing with false-positive/false-negative counts
-- First-class SOC alerts with explainable event/rule lineage
-- Dynamic entity-risk records for hosts, users, and network entities
-- Tenant-scoped cases, timelines, and analyst notes
-- Local threat-intelligence registry
-- Idempotent SOAR execution requests with mandatory human approval
-- Dependency readiness and authenticated operational metrics
-- Temporal correlation rules and automatically grouped SOC incidents
-- Redis-backed API rate limiting and defensive response headers
-- Feature flags and tenant-specific retention policies
-- Isolated BullMQ SOAR executor with an explicit action allowlist
-- Operational console for Alerts, Incidents, Cases, Risk, Detections, Intel, and SOAR
-
-###  Distributed Queue
-- BullMQ + Redis
-- 3x retry with exponential backoff (2s → 4s → 8s)
-- Dead Letter Queue for permanent failures
-- Configurable concurrency
-
----
-
-##  Risk Rules Coverage
-
-| Rule | What it detects |
-|------|----------------|
-| `missing_csp` | Missing Content-Security-Policy header |
-| `missing_hsts` | Missing Strict-Transport-Security header |
-| `missing_x_frame_options` | Clickjacking exposure |
-| `missing_content_type_options` | MIME sniffing vulnerability |
-| `weak_authentication` | Weak credentials or missing rate limiting |
-| `exposed_admin_panel` | Unauthenticated admin endpoints |
-| `slow_response` | Latency above threshold (DoS indicator) |
-| `http_only` | Missing TLS |
-
----
-
-##  What This Demonstrates
-
-| Concept | Implementation in Hydra |
-|---------|------------------------|
-| Distributed systems | Decoupled API + Worker + Queue |
-| Event-driven architecture | BullMQ with retry and DLQ |
-| Real-time processing | WebSocket + live incident stream |
-| Security engineering | Risk Engine with 8 extensible rules |
-| Clean Architecture | SOLID, Repository pattern, DI |
-| Observability | Pino structured logging with context |
-| DevOps | Docker Compose with 5 orchestrated services |
-
----
-
-##  Tech Stack
-
-**Backend:** Node.js 22, Fastify 5.3, TypeScript 5.8 strict,
-Prisma ORM, PostgreSQL 16, Redis 7, BullMQ 5.76, Pino
-
-**Frontend:** React, TypeScript, Recharts, custom SVG engine,
-native WebSocket
-
-**Infrastructure:** Docker, Docker Compose, Monorepo (npm workspaces)
-
----
-
-##  Validated with hydra-lab
-
-This system was validated using
-**[hydra-lab](https://github.com/diegoDrp-Dev/hydra-lab)** —
-a separate repository with intentionally vulnerable targets
-that exercise all 8 Risk Engine rules.
-
-```bash
-# Inside hydra-lab
-npm run demo   # scans all 4 targets every 2–7s
-```
-
----
-
-##  System Status
-
-| Module | Status |
-|--------|--------|
-| API Gateway |  |
-| Worker Engine |  |
-| Risk Engine |  |
-| Incident Manager |  |
-| SOC Dashboard |  |
-| WebSocket Stream |  |
-| Webhook Alerts |  |
-| Docker Compose |  |
-
----
-
-> Having issues? See the [full running guide](./docs/RUNNING.md)
-
----
-
-##  Author
-
-**Diego Rodrigues Pereira**
-
-Security Engineer | Backend Developer
-
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-diego--rodrigues--pereira-0077b5?style=flat&logo=linkedin)](https://www.linkedin.com/in/diego-rodrigues-pereira-drp/)
-[![GitHub](https://img.shields.io/badge/GitHub-diegoDrp--Dev-181717?style=flat&logo=github)](https://github.com/diegoDrp-Dev)
-
----
-
- *Simulation project built for educational and portfolio purposes.
-No real-world systems are targeted or affected.*
-
----
-
-MIT License  2026 Diego Rodrigues Pereira
+Não faça commit de `.env`, tokens, chaves ou credenciais. Scans e webhooks bloqueiam destinos privados por padrão. O modo SOAR de execução real permanece desabilitado até ativação explícita e deve ser usado somente em ambientes autorizados.
 

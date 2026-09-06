@@ -6,7 +6,7 @@ Accepted — 2026-09-03.
 
 ## Context
 
-Hydra needs tenant isolation, normalized telemetry, deterministic detections,
+Koryn Security Platform needs tenant isolation, normalized telemetry, deterministic detections,
 investigation state, threat intelligence, and controlled response without
 requiring Kafka, OpenSearch, Kubernetes, or autonomous AI during local development.
 

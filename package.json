@@ -1,5 +1,5 @@
 {
-  "name": "hydra",
+  "name": "koryn-security-platform",
   "private": true,
   "packageManager": "npm@11.11.0",
   "workspaces": [
@@ -13,16 +13,19 @@
     "test": "npm --workspace=api-gateway test",
     "lint": "npm --workspace=web run lint",
     "validate": "npm run typecheck && npm run test && npm run lint && npm run build",
-    "hydra:boot": "docker-compose up --build",
-    "hydra:down": "docker-compose down --volumes"
+    "koryn:boot": "docker compose up --build",
+    "koryn:down": "docker compose down"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "turbo": "^2.0.0",
     "tsx": "^4.0.0",
+    "turbo": "^2.0.0",
     "typescript": "^5.8.0"
   },
   "prisma": {
     "schema": "apps/api-gateway/prisma/schema.prisma"
+  },
+  "overrides": {
+    "esbuild": "0.28.1"
   }
 }

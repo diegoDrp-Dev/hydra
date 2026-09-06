@@ -1,28 +1,31 @@
+name: koryn-security-platform
+
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: hydra-postgres
+    container_name: koryn-postgres
     environment:
       POSTGRES_USER: ${DB_USER:-hydra}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-hydra}
       POSTGRES_DB: ${DB_NAME:-hydra}
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U hydra"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   redis:
     image: redis:7-alpine
-    container_name: hydra-redis
+    container_name: koryn-redis
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD to a strong random value}
+    command: ["sh", "-c", "exec redis-server --appendonly yes --requirepass \"$$REDIS_PASSWORD\""]
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "REDISCLI_AUTH=$$REDIS_PASSWORD redis-cli ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -31,20 +34,26 @@ services:
     build:
       context: .
       dockerfile: apps/api-gateway/Dockerfile
-    container_name: hydra-api
+    container_name: koryn-api
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://${DB_USER:-hydra}:${DB_PASSWORD:-hydra}@postgres:5432/${DB_NAME:-hydra}
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD to a strong random value}
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET to a strong random value}
       JWT_EXPIRES_IN: 24h
+      JWT_ISSUER: ${JWT_ISSUER:-koryn-security-platform}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-koryn-console}
       LOG_LEVEL: debug
       SOAR_EXECUTION_ENABLED: ${SOAR_EXECUTION_ENABLED:-false}
       ALLOW_PRIVATE_SCAN_TARGETS: ${ALLOW_PRIVATE_SCAN_TARGETS:-false}
+      WEBHOOK_ALLOW_PRIVATE_TARGETS: ${WEBHOOK_ALLOW_PRIVATE_TARGETS:-false}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
+    security_opt:
+      - no-new-privileges:true
     depends_on:
       postgres:
         condition: service_healthy
@@ -61,16 +70,20 @@ services:
     build:
       context: .
       dockerfile: apps/api-gateway/Dockerfile
-    container_name: hydra-worker
+    container_name: koryn-worker
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://${DB_USER:-hydra}:${DB_PASSWORD:-hydra}@postgres:5432/${DB_NAME:-hydra}
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD to a strong random value}
       WORKER_CONCURRENCY: 5
       LOG_LEVEL: debug
       SOAR_EXECUTION_ENABLED: ${SOAR_EXECUTION_ENABLED:-false}
       ALLOW_PRIVATE_SCAN_TARGETS: ${ALLOW_PRIVATE_SCAN_TARGETS:-false}
+      WEBHOOK_ALLOW_PRIVATE_TARGETS: ${WEBHOOK_ALLOW_PRIVATE_TARGETS:-false}
+    security_opt:
+      - no-new-privileges:true
     depends_on:
       postgres:
         condition: service_healthy
@@ -88,15 +101,18 @@ services:
     build:
       context: .
       dockerfile: apps/api-gateway/Dockerfile
-    container_name: hydra-soar-worker
+    container_name: koryn-soar-worker
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://${DB_USER:-hydra}:${DB_PASSWORD:-hydra}@postgres:5432/${DB_NAME:-hydra}
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD to a strong random value}
       WORKER_CONCURRENCY: 3
       LOG_LEVEL: debug
       SOAR_EXECUTION_ENABLED: ${SOAR_EXECUTION_ENABLED:-false}
+    security_opt:
+      - no-new-privileges:true
     depends_on:
       postgres:
         condition: service_healthy
@@ -112,9 +128,11 @@ services:
   web:
     build:
       context: ./apps/web
-    container_name: hydra-web
+    container_name: koryn-web
     ports:
-      - "5173:5173"
+      - "127.0.0.1:5173:5173"
+    security_opt:
+      - no-new-privileges:true
     depends_on:
       - api
     volumes:
@@ -124,4 +142,6 @@ services:
 
 volumes:
   postgres_data:
+    name: hydra_postgres_data # Compatibility: preserves the existing database volume.
   redis_data:
+    name: hydra_redis_data # Compatibility: preserves queued local data during migration.

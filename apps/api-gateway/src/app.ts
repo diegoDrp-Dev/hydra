@@ -23,7 +23,7 @@ import { correlationRoutes } from "./modules/correlation/correlation.routes.js";
 import { registerRateLimit } from "./modules/middlewares/rate-limit.middleware.js";
 
 export const app = Fastify({
-  logger: true,
+  logger: { redact: ["req.headers.authorization", "req.headers.cookie", "request.headers.authorization", "password", "token", "*.password", "*.token"] },
 });
 
 app.decorateRequest("user", null);
@@ -90,8 +90,8 @@ app.get("/metrics", { preHandler: [authMiddleware, requireRole("ADMIN")] }, asyn
 app.register(swagger, {
   swagger: {
     info: {
-      title: "Hydra API",
-      description: "Cyber Orchestrator System",
+      title: "Koryn Security Platform API",
+      description: "Enterprise cybersecurity monitoring, detection and response by HOJO",
       version: "1.0.0",
     },
 
@@ -119,7 +119,7 @@ app.register(swaggerUI, {
 
   uiConfig: {
     docExpansion: "list",
-    persistAuthorization: true,
+    persistAuthorization: false,
   },
 });
 

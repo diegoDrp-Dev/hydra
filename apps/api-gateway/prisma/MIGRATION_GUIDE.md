@@ -1,4 +1,4 @@
-# Hydra Risk Engine, Incidents & Alerts Migration
+# Koryn Risk Engine, Incidents & Alerts Migration
 
 This migration adds:
 - Risk table (for detected security risks)

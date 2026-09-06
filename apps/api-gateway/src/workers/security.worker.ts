@@ -46,8 +46,7 @@ const worker = new Worker(
     logger.info(
       {
         jobId: job.id,
-        originalUrl: url,
-        resolvedUrl: targetUrl,
+        targetHost: new URL(targetUrl).hostname,
       },
       "Processing security scan"
     );
@@ -56,14 +55,14 @@ const worker = new Worker(
       const start = Date.now();
 
       logger.info(
-        { jobId: job.id, targetUrl },
-        "DEBUG: Starting HTTP request"
+        { jobId: job.id, targetHost: new URL(targetUrl).hostname },
+        "Starting HTTP request"
       );
 
       // HTTP REQUEST
       const response = await axios.get(targetUrl, {
         timeout: env.scanTimeoutMs,
-        maxRedirects: env.scanMaxRedirects,
+        maxRedirects: 0,
         maxContentLength: 1_000_000,
         maxBodyLength: 1_000_000,
         validateStatus: () => true,
@@ -77,7 +76,7 @@ const worker = new Worker(
           status: response.status,
           duration,
         },
-        "DEBUG: HTTP request completed"
+        "HTTP request completed"
       );
 
       // RISK ENGINE
@@ -153,7 +152,7 @@ const worker = new Worker(
         );
 
         if (incidentResult.isNewIncident) {
-          await redisConnection.publish("hydra:incidents", JSON.stringify(incident));
+          await redisConnection.publish("koryn:incidents", JSON.stringify(incident));
           const { sent, failed } =
             await webhookService.notifySubscribers(incident);
 
@@ -178,10 +177,9 @@ const worker = new Worker(
         {
           jobId: job.id,
           message: err.message,
-          stack: err.stack,
-          url: targetUrl,
+          targetHost: new URL(targetUrl).hostname,
         },
-        "SCAN FAILED (FULL DEBUG)"
+        "Scan failed"
       );
 
       throw error;

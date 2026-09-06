@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "============================================================"
-echo "  HYDRA - SECURITY PLATFORM (Modo Desenvolvimento)"
+echo "  KORYN SECURITY PLATFORM by HOJO (Modo Desenvolvimento)"
 echo "============================================================"
 echo ""
 echo "[1/2] Verificando configuracoes de seguranca..."
@@ -11,4 +11,4 @@ fi
 echo ""
 echo "[2/2] Iniciando API, Worker, Web e Infraestrutura..."
 echo "Pressione Ctrl+C para encerrar todos os servicos."
-docker-compose up --build
+docker compose up --build

@@ -42,10 +42,13 @@ export class GenericAdapter {
       const response = await axios.post(payload.webhookUrl, body, {
         headers: {
           "Content-Type": "application/json",
-          "User-Agent": "Hydra-Security-Platform/1.0",
-          "X-Hydra-Event": "incident-alert",
+          "User-Agent": "Koryn-Security-Platform/1.0",
+          "X-Koryn-Event": "incident-alert",
         },
         timeout: 10000,
+        maxRedirects: 0,
+        maxContentLength: 256_000,
+        maxBodyLength: 256_000,
       });
 
       logger.info(
