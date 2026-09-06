@@ -1,3 +1,4 @@
+import { displayBrand } from "./lib/branding";
 import React from 'react';
 import type { RadarNode } from './useRadarNodes';
 
@@ -25,12 +26,12 @@ const RadarTooltip: React.FC<Props> = ({ node, color }) => {
                 <span style={{ color }}>{node.severity.toUpperCase()}</span>
                 <span className="text-gray-500">{new Date(node.createdAt).toLocaleTimeString()}</span>
             </div>
-            <div className="text-cyan-400 font-bold mb-1" style={{ overflowWrap: 'anywhere' }}>{node.hostname}</div>
+            <div className="text-cyan-400 font-bold mb-1" style={{ overflowWrap: 'anywhere' }}>{displayBrand(node.hostname)}</div>
             <div className="text-gray-300">SCORE: <span className="text-white">{node.score}/100</span></div>
             <div className="text-gray-300">ISSUES: <span className="text-white">{node.issues.length}</span></div>
             <div className="mt-2 space-y-0.5">
                 {node.issues.slice(0, 3).map((issue, i) => (
-                    <div key={i} className="text-gray-400 truncate">• {issue}</div>
+                    <div key={i} className="text-gray-400 truncate">• {displayBrand(issue)}</div>
                 ))}
             </div>
         </div>

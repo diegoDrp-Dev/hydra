@@ -26,3 +26,13 @@ npm --workspace=web run dev
 npm --workspace=web run lint
 npm --workspace=web run build
 ```
+
+## Publication polish
+
+Telemetry source: backend/API. The card deduplicates URL hosts from scans and host/name/id/domain, source IP and destination IP from the loaded events (up to 100). It describes observed targets, not an inventory of collectors.
+
+Legacy branding is formatted only at render time, including queue, tables, evidence and tooltips. Original API values and identifiers remain unchanged. The legacy browser token key remains for session migration. Database names/volumes and legacy WebSocket compatibility belong to the backend and are unchanged.
+
+Greeting priority remains displayName, firstName, name, role, Analyst. Current login tokens provide role and email, without a profile name. Email is not used to infer a greeting name.
+
+Realtime connected requires an open WebSocket. Polling fallback requires a successful API refresh in the last 65 seconds with no subsequent refresh error; reconnect attempts and disconnected API states are labelled separately.

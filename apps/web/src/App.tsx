@@ -1,3 +1,4 @@
+import { displayBrand } from "./lib/branding";
 import { lazy, Suspense, useState } from "react";
 import { API_BASE_URL } from "./lib/api";
 
@@ -80,7 +81,7 @@ export default function App() {
           <form onSubmit={authenticate}>
             <label>Email address<input type="email" autoComplete="email" pattern="[^\s@]+@[^\s@]+\.[^\s@]{2,}" title="Use a complete email address, such as analyst@company.com" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="analyst@company.com" required /></label>
             <label>Password<input type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} minLength={mode === "register" ? 12 : 1} maxLength={128} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••••••" required />{mode === "register" && <small className="field-hint">Use at least 12 characters.</small>}</label>
-            {message && <div className="form-message" role="status">{message}</div>}
+            {message && <div className="form-message" role="status">{displayBrand(message)}</div>}
             <button className="primary-button" disabled={submitting}>{submitting ? "Authenticating…" : mode === "login" ? "Enter operations console" : "Create secure workspace"}<span>→</span></button>
           </form>
           <button className="text-button" onClick={() => { setMode(mode === "login" ? "register" : "login"); setMessage(""); }}>{mode === "login" ? "Need an analyst workspace? Create one" : "Already provisioned? Sign in"}</button>

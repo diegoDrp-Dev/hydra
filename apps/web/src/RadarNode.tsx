@@ -1,3 +1,4 @@
+import { displayBrand } from "./lib/branding";
 import React from 'react';
 import type { RadarNode as RadarNodeProps } from './useRadarNodes';
 
@@ -52,8 +53,8 @@ const RadarNode: React.FC<Props> = ({ node, isHovered, onHover, color }) => {
                 style={{ pointerEvents: 'none', opacity: isHovered ? 1 : 0.7 }}
             >
                 {node.hostname.length > 15
-                    ? `${node.hostname.substring(0, 12)}...`
-                    : node.hostname
+                    ? `${displayBrand(node.hostname).substring(0, 12)}...`
+                    : displayBrand(node.hostname)
                 }
             </text>
         </g>
