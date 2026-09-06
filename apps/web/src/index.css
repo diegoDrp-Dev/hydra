@@ -14,14 +14,9 @@
 @media(max-width:760px){.auth-shell{grid-template-columns:1fr}.auth-brand{display:none}.auth-panel{padding:24px;border:0}.app-shell{display:block}.sidebar{transform:translateX(-100%);transition:transform .2s}.sidebar.open{transform:none}.workspace-main{display:block}.mobile-menu{display:grid}.topbar{padding:0 14px}.command-trigger{display:none}.workspace-content{padding:18px 12px}.page-heading{align-items:start;gap:15px}.last-updated{display:none}.metric-grid{grid-template-columns:1fr 1fr}.overview-grid{display:block}.panel{margin-bottom:12px}.panel.span-2{grid-column:auto}.table-toolbar{flex-wrap:wrap}.search-field{min-width:100%;flex:1}.result-count{margin-left:0}.primary-action{display:none}.trust-row{flex-wrap:wrap}.detail-drawer{width:100%}}
 @media(max-width:440px){.metric-grid{grid-template-columns:1fr}.auth-card{padding:25px}.page-heading h2{font-size:23px}.topbar-actions .icon-button{display:none}}
 
-/* Native-feeling dark scrollbars keep the navigation accessible without a bright gutter. */
-.sidebar-nav{scrollbar-width:thin;scrollbar-color:transparent transparent;scrollbar-gutter:stable}
-.sidebar-nav:hover,.sidebar-nav:focus-within{scrollbar-color:#324555 transparent}
-.sidebar-nav::-webkit-scrollbar{width:6px}
-.sidebar-nav::-webkit-scrollbar-track{background:transparent}
-.sidebar-nav::-webkit-scrollbar-thumb{border-radius:8px;background:#32455500}
-.sidebar-nav:hover::-webkit-scrollbar-thumb,.sidebar-nav:focus-within::-webkit-scrollbar-thumb{background:#324555cc}
-.sidebar-nav::-webkit-scrollbar-thumb:hover{background:#456074}
+/* Hide only the native indicator; the sidebar remains scrollable by wheel, touch, trackpad and keyboard. */
+.sidebar-nav{overflow-y:auto;scrollbar-width:none;-ms-overflow-style:none}
+.sidebar-nav::-webkit-scrollbar{display:none;width:0;height:0}
 
 .panel-title-action{display:flex;flex-shrink:0;align-items:center;color:#597080;font:8px "DM Mono";text-transform:uppercase}
 .risk-periods{display:flex;gap:2px;padding:2px;border:1px solid #1f3040;border-radius:7px;background:#070d13}
