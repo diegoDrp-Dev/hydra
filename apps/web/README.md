@@ -1,73 +1,28 @@
-# React + TypeScript + Vite
+# Koryn Security Platform — Web Console
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend React/Vite do console SOC da Koryn Security Platform by HOJO.
 
-Currently, two official plugins are available:
+## Dados do dashboard
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Alertas: `GET /soc/alerts`
+- Incidentes: `GET /soc/incidents`
+- Risco de entidades: `GET /soc/entity-risks`
+- Eventos: `GET /events?limit=100`
+- Scans: `GET /scan`
+- Realtime: WebSocket autenticado em `/ws`
 
-## React Compiler
+O card **Asset telemetry** representa a quantidade de hosts/alvos únicos extraídos dos scans e dos campos de rede/host dos eventos carregados. Ele não representa agentes ou coletores.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Risk signal
 
-## Expanding the ESLint configuration
+Os períodos `1h`, `6h`, `24h`, `7d` e `30d` são aplicados no cliente aos até 200 alertas mais recentes retornados atualmente por `/soc/alerts`. Não há agregação nem geração de dados fictícios. Para ambientes com mais de 200 alertas no intervalo, a API deverá futuramente oferecer filtros temporais e agregação server-side.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+O limiar crítico de 80 reflete a política `calculateSeverity` do risk engine no backend: scores iguais ou superiores a 80 são críticos.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Desenvolvimento
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm --workspace=web run dev
+npm --workspace=web run lint
+npm --workspace=web run build
 ```

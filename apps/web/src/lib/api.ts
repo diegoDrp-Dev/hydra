@@ -22,13 +22,29 @@ export async function apiRequest<T>(token: string, path: string, init?: RequestI
   return body as T;
 }
 
-export function decodeSession(token: string): { email: string; role: string; tenantId: string } | null {
+export type SessionIdentity = {
+  email: string;
+  role: string;
+  tenantId: string;
+  displayName?: string;
+  firstName?: string;
+  name?: string;
+};
+
+export function decodeSession(token: string): SessionIdentity | null {
   try {
     const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
     if (!payload.email || !payload.tenantId) return null;
-    return { email: String(payload.email), role: String(payload.role ?? "ANALYST"), tenantId: String(payload.tenantId) };
+    const optionalText = (value: unknown) => typeof value === "string" && value.trim() ? value.trim() : undefined;
+    return {
+      email: String(payload.email),
+      role: String(payload.role ?? "ANALYST"),
+      tenantId: String(payload.tenantId),
+      displayName: optionalText(payload.displayName),
+      firstName: optionalText(payload.firstName),
+      name: optionalText(payload.name),
+    };
   } catch {
     return null;
   }
 }
-
